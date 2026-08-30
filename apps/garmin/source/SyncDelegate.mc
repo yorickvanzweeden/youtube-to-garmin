@@ -137,8 +137,13 @@ class GarminSyncDelegate extends Communications.SyncDelegate {
         }
         var item = _pendingItems[_nextItem];
         if (item["deleted"] == true) {
-            var contentRef = new Media.ContentRef(item["id"], Media.CONTENT_TYPE_AUDIO);
+            var contentId = Application.Storage.getValue("contentRef:" + item["id"]);
+            if (contentId == null) {
+                contentId = item["id"];
+            }
+            var contentRef = new Media.ContentRef(contentId, Media.CONTENT_TYPE_AUDIO);
             Media.deleteCachedItem(contentRef);
+            Application.Storage.deleteValue("contentRef:" + item["id"]);
             _nextItem += 1;
             Communications.notifySyncProgress((_nextItem * 100) / _pendingItems.size());
             downloadNext();
@@ -153,11 +158,13 @@ class GarminSyncDelegate extends Communications.SyncDelegate {
         Communications.makeWebRequest(item["url"], null, options, method(:onAudio));
     }
 
-    function onAudio(responseCode as Number, data as PersistedContent.Iterator?) as Void {
+    function onAudio(responseCode as Number, data) as Void {
         if (responseCode != 200) {
             Communications.notifySyncComplete("Audio download failed");
             return;
         }
+        var item = _pendingItems[_nextItem];
+        Application.Storage.setValue("contentRef:" + item["id"], data.getId());
         _nextItem += 1;
         Communications.notifySyncProgress((_nextItem * 100) / _pendingItems.size());
         downloadNext();
