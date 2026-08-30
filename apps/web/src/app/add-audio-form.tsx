@@ -8,7 +8,6 @@ import { Select } from "../components/ui/select";
 
 export function AddAudioForm() {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [profile, setProfile] = useState("music-128");
   const [error, setError] = useState("");
@@ -31,7 +30,6 @@ export function AddAudioForm() {
         return;
       }
       setUrl("");
-      setOpen(false);
       router.refresh();
     } catch {
       setError("Network error. Check your connection and try again.");
@@ -40,19 +38,16 @@ export function AddAudioForm() {
     }
   }
 
-  if (!open)
-    return (
-      <Button
-        className="primary-button"
-        type="button"
-        onClick={() => setOpen(true)}
-      >
-        <span>＋</span> Add audio
-      </Button>
-    );
   return (
-    <form className="add-audio-form" onSubmit={submit}>
-      <label htmlFor="youtube-url">YouTube URL</label>
+    <form className="add-audio-form" onSubmit={submit} aria-label="Add audio">
+      <div className="add-audio-heading">
+        <div className="add-audio-icon">＋</div>
+        <div>
+          <h3>Add audio from YouTube</h3>
+          <p>Paste a link and we’ll prepare it for your Garmin.</p>
+        </div>
+      </div>
+      <label htmlFor="youtube-url">YouTube video URL</label>
       <div className="add-audio-fields">
         <Input
           id="youtube-url"
@@ -72,16 +67,6 @@ export function AddAudioForm() {
         </Select>
         <Button type="submit" disabled={saving}>
           {saving ? "Adding…" : "Add"}
-        </Button>
-        <Button
-          variant="ghost"
-          type="button"
-          onClick={() => {
-            setOpen(false);
-            setError("");
-          }}
-        >
-          Cancel
         </Button>
       </div>
       {error && (

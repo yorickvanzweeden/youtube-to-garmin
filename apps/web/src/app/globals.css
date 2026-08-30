@@ -142,7 +142,7 @@ nav {
   margin-left: 3px;
 }
 .hero-row {
-  margin-bottom: 28px;
+  margin-bottom: 18px;
 }
 .hero-row h2 {
   font-size: 30px;
@@ -180,7 +180,36 @@ nav {
   background: #f2faf7;
   border-radius: 11px;
   padding: 12px;
-  min-width: min(100%, 620px);
+  width: 100%;
+  margin-bottom: 32px;
+  padding: 22px;
+  box-shadow: 0 12px 30px #1f8f700d;
+}
+.add-audio-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 18px;
+}
+.add-audio-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--green);
+  color: white;
+  font-size: 24px;
+}
+.add-audio-heading h3 {
+  margin: 0 0 3px;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+.add-audio-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
 }
 .add-audio-form label {
   display: block;
@@ -204,7 +233,19 @@ nav {
   color: var(--ink);
   padding: 10px;
   font-size: 12px;
+  min-height: 42px;
   min-width: 0;
+}
+.add-audio-fields input:focus,
+.add-audio-fields select:focus,
+.pair-form input:focus {
+  outline: 2px solid #8bd5bd;
+  outline-offset: 1px;
+  border-color: var(--green);
+}
+.hero-hint {
+  color: var(--muted);
+  font-size: 12px;
 }
 .add-audio-fields input {
   flex: 1;

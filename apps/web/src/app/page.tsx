@@ -142,13 +142,15 @@ export default async function Home() {
 
         <div className="hero-row">
           <div>
+            <p className="eyebrow">QUICK START</p>
             <h2>Your audio, ready to go.</h2>
             <p className="muted">
-              Add a YouTube video and it will be prepared for your Garmin.
+              Turn any YouTube video into Garmin-ready audio.
             </p>
           </div>
-          <AddAudioForm />
+          <span className="hero-hint">Usually ready in a few minutes</span>
         </div>
+        <AddAudioForm />
 
         <div className="stats-row">
           <div className="stat-card">
