@@ -180,6 +180,14 @@ resource "google_cloud_run_v2_job_iam_member" "task_runner" {
   member   = "serviceAccount:${google_service_account.web_runtime.email}"
 }
 
+resource "google_cloud_run_v2_job_iam_member" "task_runner_developer" {
+  project  = var.project_id
+  location = var.region
+  name     = google_cloud_run_v2_job.media_worker.name
+  role     = "roles/run.developer"
+  member   = "serviceAccount:${google_service_account.web_runtime.email}"
+}
+
 resource "google_project_iam_member" "web_firestore" {
   project = var.project_id
   role    = "roles/datastore.user"
