@@ -141,7 +141,7 @@ resource "google_cloud_run_v2_job" "media_worker" {
   name                = var.cloud_run_job_name
   project             = var.project_id
   location            = var.region
-  deletion_protection = false
+  deletion_protection = true
 
   template {
     task_count = 1
