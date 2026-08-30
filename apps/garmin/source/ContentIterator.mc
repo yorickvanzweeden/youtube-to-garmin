@@ -10,19 +10,13 @@ class GarminContentIterator extends Media.ContentIterator {
     function initialize() {
         ContentIterator.initialize();
         var selectedTrack = Application.Storage.getValue("selectedTrack");
+        var cachedIds = Application.Storage.getValue("cachedIds") as Dictionary;
         if (selectedTrack != null) {
             _contentRefs.add(new Media.ContentRef(selectedTrack, Media.CONTENT_TYPE_AUDIO));
-        } else {
-            var refs = Media.getContentRefIter({
-                :contentType => Media.CONTENT_TYPE_AUDIO,
-                :shuffle => false
-            });
-            if (refs != null) {
-                var contentRef = refs.next();
-                while (contentRef != null) {
-                    _contentRefs.add(contentRef);
-                    contentRef = refs.next();
-                }
+        } else if (cachedIds != null) {
+            var keys = cachedIds.keys();
+            for (var index = 0; index < keys.size(); index += 1) {
+                _contentRefs.add(new Media.ContentRef(cachedIds[keys[index]], Media.CONTENT_TYPE_AUDIO));
             }
         }
     }

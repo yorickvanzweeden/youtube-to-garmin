@@ -165,47 +165,16 @@ class GarminSyncDelegate extends Communications.SyncDelegate {
             return;
         }
         var item = _pendingItems[_nextItem];
-        var cachedIds = {};
-        var storedIds = Application.Storage.getValue("cachedIds") as Dictionary;
-        if (storedIds != null) {
-            cachedIds = storedIds;
+        var cachedIds = Application.Storage.getValue("cachedIds") as Dictionary;
+        if (cachedIds == null) {
+            cachedIds = {} as Dictionary;
         }
-        var cachedId = findNewCachedId(cachedIds);
-        if (cachedId == null) {
-            Communications.notifySyncComplete("Downloaded audio was not cached");
-            return;
-        }
-        cachedIds[item["id"]] = cachedId;
+        var content = data as Media.Content;
+        cachedIds[item["id"]] = content.getContentRef().getId();
         Application.Storage.setValue("cachedIds", cachedIds);
         _nextItem += 1;
         Communications.notifySyncProgress((_nextItem * 100) / _pendingItems.size());
         downloadNext();
     }
 
-    function findNewCachedId(cachedIds as Dictionary) as String? {
-        var refs = Media.getContentRefIter({
-            :contentType => Media.CONTENT_TYPE_AUDIO,
-            :shuffle => false
-        });
-        if (refs == null) {
-            return null;
-        }
-        var ref = refs.next();
-        while (ref != null) {
-            var refId = ref.getId() as String;
-            var known = false;
-            var keys = cachedIds.keys();
-            for (var index = 0; index < keys.size(); index += 1) {
-                if (cachedIds[keys[index]] == refId) {
-                    known = true;
-                    break;
-                }
-            }
-            if (!known) {
-                return refId;
-            }
-            ref = refs.next();
-        }
-        return null;
-    }
 }

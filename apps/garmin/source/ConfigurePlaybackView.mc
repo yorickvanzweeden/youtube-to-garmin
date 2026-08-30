@@ -26,14 +26,12 @@ class GarminConfigurePlaybackView extends WatchUi.View {
             return;
         }
 
-        var refs = Media.getContentRefIter({
-            :contentType => Media.CONTENT_TYPE_AUDIO,
-            :shuffle => false
-        });
         var menu = new WatchUi.CheckboxMenu({:title => "Play Downloads"});
         var selectedTrack = Application.Storage.getValue("selectedTrack");
-        var ref = refs.next();
-        while (ref != null) {
+        var cachedIds = Application.Storage.getValue("cachedIds") as Dictionary;
+        var keys = cachedIds == null ? [] : cachedIds.keys();
+        for (var index = 0; index < keys.size(); index += 1) {
+            var ref = new Media.ContentRef(cachedIds[keys[index]], Media.CONTENT_TYPE_AUDIO);
             var content = Media.getCachedContentObj(ref);
             if (content != null) {
                 var metadata = content.getMetadata();
@@ -49,7 +47,6 @@ class GarminConfigurePlaybackView extends WatchUi.View {
                     {}
                 ));
             }
-            ref = refs.next();
         }
         WatchUi.pushView(menu, new GarminConfigurePlaybackMenuDelegate(), WatchUi.SLIDE_IMMEDIATE);
         _menuShown = true;
