@@ -16,17 +16,22 @@ export async function GET(request: Request) {
     );
   }
 
-  const snapshot = await firestore()
-    .collection("media")
-    .where("status", "==", "ready")
-    .where("syncToGarmin", "==", true)
-    .limit(200)
-    .get();
+  const snapshot = await firestore().collection("media").limit(200).get();
   const items = await Promise.all(
     snapshot.docs.map(async (document) => {
       const media = document.data();
       const revision = typeof media.revision === "number" ? media.revision : 0;
-      if (revision <= since || !media.output?.object) return null;
+      if (revision <= since) return null;
+      if (media.status === "deleted") {
+        return { id: document.id, revision, deleted: true };
+      }
+      if (
+        media.status !== "ready" ||
+        media.syncToGarmin !== true ||
+        !media.output?.object
+      ) {
+        return null;
+      }
       return {
         id: document.id,
         revision,

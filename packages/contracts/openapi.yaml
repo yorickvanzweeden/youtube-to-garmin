@@ -132,4 +132,4 @@ components:
       required: [revision, items]
       properties:
         revision: { type: integer, minimum: 0 }
-        items: { type: array, items: { type: object, required: [id, revision, title, artist, url], properties: { id: { type: string }, revision: { type: integer }, title: { type: string }, artist: { type: string }, durationSeconds: { type: [integer, 'null'] }, url: { type: string, format: uri } } } }
+        items: { type: array, items: { type: object, required: [id, revision], properties: { id: { type: string }, revision: { type: integer }, deleted: { type: boolean, default: false }, title: { type: string }, artist: { type: string }, durationSeconds: { type: [integer, 'null'] }, url: { type: string, format: uri } } } }
