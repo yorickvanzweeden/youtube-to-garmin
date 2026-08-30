@@ -121,6 +121,12 @@ resource "google_cloud_tasks_queue" "media_launch" {
   depends_on = [google_project_service.required]
 }
 
+resource "google_project_iam_member" "web_tasks_enqueuer" {
+  project = var.project_id
+  role    = "roles/cloudtasks.enqueuer"
+  member  = "serviceAccount:${google_service_account.web_runtime.email}"
+}
+
 resource "google_cloud_run_v2_job" "media_worker" {
   name     = var.cloud_run_job_name
   project  = var.project_id
