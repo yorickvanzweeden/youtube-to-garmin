@@ -11,7 +11,7 @@ from .pipeline import AudioProfile, MediaProcessError, process_media
 def run_job(job_id: str, store: JobStore, media_storage: MediaStorage) -> int:
     job = store.load(job_id)
     if job is None:
-        return _fail(store, job_id, "job_not_found", "Job does not exist", False)
+        return _fail(store, job_id, "", "job_not_found", "Job does not exist", False)
     if job.state.value == "ready":
         return 0
     if not store.acquire_lease(job_id, socket.gethostname()):
@@ -25,11 +25,28 @@ def run_job(job_id: str, store: JobStore, media_storage: MediaStorage) -> int:
         store.mark_ready(job.id, job.media_id, output)
         return 0
     except MediaProcessError as error:
-        return _fail(store, job.id, error.failure.code.value, str(error), error.failure.retryable)
+        return _fail(
+            store,
+            job.id,
+            job.media_id,
+            error.failure.code.value,
+            str(error),
+            error.failure.retryable,
+        )
     except Exception as error:  # noqa: BLE001 - Cloud Run must persist unexpected failures
-        return _fail(store, job.id, "worker_error", str(error), True)
+        return _fail(store, job.id, job.media_id, "worker_error", str(error), True)
 
 
-def _fail(store: JobStore, job_id: str, code: str, message: str, retryable: bool) -> int:
-    store.mark_failed(job_id, {"code": code, "message": message, "retryable": retryable})
+def _fail(
+    store: JobStore,
+    job_id: str,
+    media_id: str,
+    code: str,
+    message: str,
+    retryable: bool,
+) -> int:
+    if media_id:
+        store.mark_failed(
+            job_id, media_id, {"code": code, "message": message, "retryable": retryable}
+        )
     return 1 if retryable else 0
