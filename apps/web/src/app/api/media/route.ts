@@ -40,26 +40,39 @@ export async function POST(request: Request) {
   const mediaId = randomUUID();
   const jobId = randomUUID();
   const now = new Date();
-  const batch = db.batch();
-  batch.set(db.collection("media").doc(mediaId), {
-    source: { type: "youtube", url: parsed.data.url },
-    profile: parsed.data.profile,
-    status: "queued",
-    syncToGarmin: true,
-    activeJobId: jobId,
-    createdAt: now,
-    updatedAt: now,
+  const revision = await db.runTransaction(async (transaction) => {
+    const libraryReference = db.collection("system").doc("library");
+    const librarySnapshot = await transaction.get(libraryReference);
+    const currentRevision = librarySnapshot.exists
+      ? Number(librarySnapshot.data()?.revision ?? 0)
+      : 0;
+    const nextRevision = currentRevision + 1;
+    transaction.set(
+      libraryReference,
+      { revision: nextRevision, updatedAt: now },
+      { merge: true },
+    );
+    transaction.set(db.collection("media").doc(mediaId), {
+      source: { type: "youtube", url: parsed.data.url },
+      profile: parsed.data.profile,
+      status: "queued",
+      syncToGarmin: true,
+      revision: nextRevision,
+      activeJobId: jobId,
+      createdAt: now,
+      updatedAt: now,
+    });
+    transaction.set(db.collection("jobs").doc(jobId), {
+      mediaId,
+      state: "queued",
+      attempts: 0,
+      createdAt: now,
+    });
+    return nextRevision;
   });
-  batch.set(db.collection("jobs").doc(jobId), {
-    mediaId,
-    state: "queued",
-    attempts: 0,
-    createdAt: now,
-  });
-  await batch.commit();
 
   return NextResponse.json(
-    { id: mediaId, jobId, status: "queued" },
+    { id: mediaId, jobId, revision, status: "queued" },
     { status: 201 },
   );
 }
