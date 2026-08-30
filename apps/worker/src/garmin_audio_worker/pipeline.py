@@ -83,6 +83,10 @@ def ffmpeg_command(
         "libmp3lame",
         "-b:a",
         bitrate,
+        "-write_xing",
+        "0",
+        "-id3v2_version",
+        "3",
     ]
     if segments:
         # SponsorBlock intervals are removed by constructing the complementary ranges.
