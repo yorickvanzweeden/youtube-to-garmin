@@ -17,10 +17,12 @@ class GarminContentIterator extends Media.ContentIterator {
                 :contentType => Media.CONTENT_TYPE_AUDIO,
                 :shuffle => false
             });
-            var contentRef = refs.next();
-            while (contentRef != null) {
-                _contentRefs.add(contentRef);
-                contentRef = refs.next();
+            if (refs != null) {
+                var contentRef = refs.next();
+                while (contentRef != null) {
+                    _contentRefs.add(contentRef);
+                    contentRef = refs.next();
+                }
             }
         }
     }
