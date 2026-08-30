@@ -9,7 +9,7 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
-    "test": "echo 'web tests are not implemented yet'"
+    "test": "vitest run"
   },
   "dependencies": {
     "@google-cloud/storage": "^8.0.1",
@@ -29,7 +29,8 @@
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.11"
   },
   "packageManager": "pnpm@10.11.0"
 }
