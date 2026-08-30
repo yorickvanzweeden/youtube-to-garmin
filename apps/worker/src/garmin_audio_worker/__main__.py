@@ -1,9 +1,6 @@
-"""Phase 0 worker entrypoint."""
+"""Executable Cloud Run Job entrypoint."""
 
-
-def main() -> None:
-    raise SystemExit("Worker implementation is intentionally deferred to Phase 6.")
-
+from .main import main
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
