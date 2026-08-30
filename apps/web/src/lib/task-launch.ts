@@ -60,9 +60,9 @@ export async function enqueueJob(jobId: string, launchGeneration = 0) {
               },
             }),
           ).toString("base64"),
-          oidcToken: {
+          oauthToken: {
             serviceAccountEmail: values.serviceAccountEmail,
-            audience: "https://run.googleapis.com/",
+            scope: "https://www.googleapis.com/auth/cloud-platform",
           },
         },
       },
