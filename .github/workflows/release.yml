@@ -9,31 +9,25 @@ permissions:
 
 jobs:
   garmin:
-    runs-on: ubuntu-latest
+    # Garmin's SDK license does not permit hosting the SDK in GitHub artifacts.
+    # Register a private runner with Connect IQ 9.2.0 installed locally.
+    runs-on: [self-hosted, linux, garmin-sdk-9.2.0]
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Install Connect IQ SDK
-        env:
-          GARMIN_SDK_URL: ${{ secrets.GARMIN_SDK_URL }}
-        run: |
-          test -n "$GARMIN_SDK_URL"
-          mkdir -p "$HOME/.Garmin/ConnectIQ/Sdks/current"
-          curl --fail --location "$GARMIN_SDK_URL" --output /tmp/connectiq-sdk.zip
-          unzip -q /tmp/connectiq-sdk.zip -d "$HOME/.Garmin/ConnectIQ/Sdks/current"
 
       - name: Export signed Garmin package
         env:
           GARMIN_DEVELOPER_KEY: ${{ secrets.GARMIN_DEVELOPER_KEY }}
           GARMIN_TARGET_DEVICE: ${{ vars.GARMIN_TARGET_DEVICE }}
+          GARMIN_SDK_BIN: ${{ vars.GARMIN_SDK_BIN }}
         run: |
           test -n "$GARMIN_TARGET_DEVICE"
+          test -n "$GARMIN_SDK_BIN"
+          key_file="$RUNNER_TEMP/garmin-developer-key.der"
+          trap 'rm -f "$key_file"' EXIT
+          printf '%s' "$GARMIN_DEVELOPER_KEY" > "$key_file"
+          chmod 600 "$key_file"
+          export GARMIN_DEVELOPER_KEY="$key_file"
           chmod +x scripts/garmin-release.sh
           scripts/garmin-release.sh "${GITHUB_REF_NAME#v}"
 
