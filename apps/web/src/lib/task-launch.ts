@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { GoogleAuth } from "google-auth-library";
 
 import { configureVercelGoogleAuth } from "./vercel-google-auth";
 
@@ -29,35 +30,38 @@ function config(): LaunchConfig {
 export async function enqueueJob(jobId: string, launchGeneration = 0) {
   configureVercelGoogleAuth();
   const values = config();
-  const { CloudTasksClient } = await import("@google-cloud/tasks");
-  const client = new CloudTasksClient();
-  const parent = client.queuePath(
-    values.projectId,
-    values.region,
-    values.queue,
-  );
+  const parent = `projects/${values.projectId}/locations/${values.region}/queues/${values.queue}`;
   const taskId = createHash("sha256")
     .update(`${jobId}:${launchGeneration}`)
     .digest("hex");
   const runUrl = `https://run.googleapis.com/v2/projects/${values.projectId}/locations/${values.region}/jobs/${values.jobName}:run`;
-  await client.createTask({
-    parent,
-    task: {
-      name: `${parent}/tasks/launch-${taskId}`,
-      httpRequest: {
-        httpMethod: "POST",
-        url: runUrl,
-        headers: { "content-type": "application/json" },
-        body: Buffer.from(
-          JSON.stringify({
-            overrides: {
-              containerOverrides: [{ env: [{ name: "JOB_ID", value: jobId }] }],
-            },
-          }),
-        ).toString("base64"),
-        oidcToken: {
-          serviceAccountEmail: values.serviceAccountEmail,
-          audience: "https://run.googleapis.com/",
+  const auth = new GoogleAuth({
+    scopes: ["https://www.googleapis.com/auth/cloud-tasks"],
+  });
+  const client = await auth.getClient();
+  await client.request({
+    url: `https://cloudtasks.googleapis.com/v2/${parent}/tasks`,
+    method: "POST",
+    data: {
+      task: {
+        name: `${parent}/tasks/launch-${taskId}`,
+        httpRequest: {
+          httpMethod: "POST",
+          url: runUrl,
+          headers: { "content-type": "application/json" },
+          body: Buffer.from(
+            JSON.stringify({
+              overrides: {
+                containerOverrides: [
+                  { env: [{ name: "JOB_ID", value: jobId }] },
+                ],
+              },
+            }),
+          ).toString("base64"),
+          oidcToken: {
+            serviceAccountEmail: values.serviceAccountEmail,
+            audience: "https://run.googleapis.com/",
+          },
         },
       },
     },
