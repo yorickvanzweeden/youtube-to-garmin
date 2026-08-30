@@ -2,6 +2,7 @@ import { auth } from "../auth";
 import { Badge } from "../components/ui/badge";
 import { firestore } from "../lib/firestore";
 import { AddAudioForm } from "./add-audio-form";
+import { DeleteMediaButton } from "./delete-media-button";
 
 export const dynamic = "force-dynamic";
 
@@ -83,7 +84,9 @@ export default async function Home() {
   ).length;
   const deviceName =
     (dashboard.device?.name as string | undefined) ?? "No device paired";
-  const tracks = dashboard.media.slice(0, 8);
+  const tracks = dashboard.media
+    .filter((item) => item.status !== "deleted")
+    .slice(0, 8);
   const systemMessage =
     dashboard.status === "operational"
       ? "All systems operational"
@@ -196,6 +199,7 @@ export default async function Home() {
                 duration={formatDuration(track.durationSeconds)}
                 status={capitalize(track.status ?? "queued")}
                 statusClass={statusClass(track.status)}
+                id={track.id}
               />
             ))
           ) : (
@@ -265,7 +269,9 @@ function Track({
   duration,
   status,
   statusClass,
+  id,
 }: {
+  id: string;
   title: string;
   detail: string;
   duration: string;
@@ -285,6 +291,7 @@ function Track({
         {status}
       </Badge>
       <span className="sync-mark">✓</span>
+      <DeleteMediaButton id={id} title={title} />
     </article>
   );
 }

@@ -1,3 +1,4 @@
+import { Storage } from "@google-cloud/storage";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "../../../../auth";
@@ -63,7 +64,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await context.params;
   const db = firestore();
-  const revision = await db.runTransaction(async (transaction) => {
+  const result = await db.runTransaction(async (transaction) => {
     const mediaReference = db.collection("media").doc(id);
     const mediaSnapshot = await transaction.get(mediaReference);
     if (
@@ -85,9 +86,19 @@ export async function DELETE(
       revision: nextRevision,
       updatedAt: new Date(),
     });
-    return nextRevision;
+    return {
+      revision: nextRevision,
+      object: mediaSnapshot.data()?.output?.object,
+    };
   });
-  if (revision === null)
+  if (result === null)
     return NextResponse.json({ error: "Media not found" }, { status: 404 });
+  const object = result.object;
+  if (typeof object === "string" && process.env.GCS_MEDIA_BUCKET) {
+    await new Storage({ projectId: process.env.GCP_PROJECT_ID })
+      .bucket(process.env.GCS_MEDIA_BUCKET)
+      .file(object)
+      .delete({ ignoreNotFound: true });
+  }
   return new NextResponse(null, { status: 204 });
 }
