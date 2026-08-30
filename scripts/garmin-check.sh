@@ -1,14 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if ! command -v monkeyc >/dev/null 2>&1; then
+monkeyc_bin="$(command -v monkeyc || true)"
+if [[ -z "$monkeyc_bin" && -x "${GARMIN_SDK_BIN:-$HOME/.Garmin/ConnectIQ/Sdks/current/bin}/monkeyc" ]]; then
+  monkeyc_bin="${GARMIN_SDK_BIN:-$HOME/.Garmin/ConnectIQ/Sdks/current/bin}/monkeyc"
+fi
+if [[ -z "$monkeyc_bin" ]]; then
   echo 'garmin-check: Connect IQ SDK not installed; skipping Phase 0'
   exit 0
 fi
 
-if [[ -z "${GARMIN_TEST_DEVICE:-}" ]]; then
-  echo 'garmin-check: GARMIN_TEST_DEVICE is unset; skipping Phase 0'
+if [[ -z "${GARMIN_DEVELOPER_KEY:-}" ]]; then
+  echo 'garmin-check: GARMIN_DEVELOPER_KEY is unset; skipping compile'
   exit 0
 fi
 
-echo "garmin-check: compiler wiring placeholder for device ${GARMIN_TEST_DEVICE}"
+if [[ ! -r "$GARMIN_DEVELOPER_KEY" ]]; then
+  echo "garmin-check: signing key is not readable: $GARMIN_DEVELOPER_KEY" >&2
+  exit 1
+fi
+
+output_file="$(mktemp --suffix=.prg)"
+trap 'rm -f "$output_file"' EXIT
+"$monkeyc_bin" -f apps/garmin/monkey.jungle -o "$output_file" -y "$GARMIN_DEVELOPER_KEY"
+echo "garmin-check: Connect IQ app compiled successfully"
