@@ -137,8 +137,15 @@ class GarminSyncDelegate extends Communications.SyncDelegate {
         }
         var item = _pendingItems[_nextItem];
         if (item["deleted"] == true) {
-            var contentRef = new Media.ContentRef(item["id"], Media.CONTENT_TYPE_AUDIO);
-            Media.deleteCachedItem(contentRef);
+            var cachedIds = Application.Storage.getValue("cachedIds") as Dictionary;
+            if (cachedIds != null) {
+                var cachedId = cachedIds[item["id"]];
+                if (cachedId != null) {
+                    Media.deleteCachedItem(new Media.ContentRef(cachedId, Media.CONTENT_TYPE_AUDIO));
+                    cachedIds.remove(item["id"]);
+                    Application.Storage.setValue("cachedIds", cachedIds);
+                }
+            }
             _nextItem += 1;
             Communications.notifySyncProgress((_nextItem * 100) / _pendingItems.size());
             downloadNext();
@@ -152,11 +159,20 @@ class GarminSyncDelegate extends Communications.SyncDelegate {
         Communications.makeWebRequest(item["url"], null, options, method(:onAudio));
     }
 
-    function onAudio(responseCode as Number, data as PersistedContent.Iterator?) as Void {
+    function onAudio(responseCode as Number, data as Null or Dictionary or String or PersistedContent.Iterator) as Void {
         if (responseCode != 200) {
             Communications.notifySyncComplete("Audio download failed");
             return;
         }
+        var item = _pendingItems[_nextItem];
+        var cachedIds = {};
+        var storedIds = Application.Storage.getValue("cachedIds") as Dictionary;
+        if (storedIds != null) {
+            cachedIds = storedIds;
+        }
+        var content = data as Media.Content;
+        cachedIds[item["id"]] = content.getContentRef().getId();
+        Application.Storage.setValue("cachedIds", cachedIds);
         _nextItem += 1;
         Communications.notifySyncProgress((_nextItem * 100) / _pendingItems.size());
         downloadNext();
