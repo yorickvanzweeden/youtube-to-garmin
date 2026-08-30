@@ -3,6 +3,12 @@ name: Release Garmin app
 on:
   push:
     tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: SemVer version to release
+        required: true
+        default: 0.1.0
 
 permissions:
   contents: write
@@ -48,7 +54,8 @@ jobs:
           chmod 600 "$key_file"
           export GARMIN_DEVELOPER_KEY="$key_file"
           chmod +x scripts/garmin-release.sh
-          scripts/garmin-release.sh "${GITHUB_REF_NAME#v}"
+          release_version="${{ inputs.version || github.ref_name }}"
+          scripts/garmin-release.sh "${release_version#v}"
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
