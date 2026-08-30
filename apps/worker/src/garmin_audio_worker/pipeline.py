@@ -9,6 +9,7 @@ from subprocess import CompletedProcess, run
 from typing import Protocol
 
 from .jobs import Failure, FailureCode, failure
+from .sponsorblock import Segment, fetch_segments
 
 
 class AudioProfile(StrEnum):
@@ -48,9 +49,11 @@ def ytdlp_command(url: str, output: Path) -> list[str]:
     ]
 
 
-def ffmpeg_command(source: Path, output: Path, profile: AudioProfile) -> list[str]:
+def ffmpeg_command(
+    source: Path, output: Path, profile: AudioProfile, segments: Sequence[Segment] = ()
+) -> list[str]:
     bitrate = "128k" if profile is AudioProfile.MUSIC else "96k"
-    return [
+    command = [
         "ffmpeg",
         "-nostdin",
         "-y",
@@ -65,8 +68,26 @@ def ffmpeg_command(source: Path, output: Path, profile: AudioProfile) -> list[st
         "libmp3lame",
         "-b:a",
         bitrate,
-        str(output),
     ]
+    if segments:
+        # SponsorBlock intervals are removed by constructing the complementary ranges.
+        ranges: list[tuple[float, float | None]] = []
+        cursor = 0.0
+        for segment in sorted(segments, key=lambda item: item.start):
+            if segment.start > cursor:
+                ranges.append((cursor, segment.start))
+            cursor = max(cursor, segment.end)
+        ranges.append((cursor, None))  # Open-ended final interval ends at EOF.
+        filters = ";".join(
+            f"[0:a]atrim=start={start}{f':end={end}' if end is not None else ''},asetpts=PTS-STARTPTS[a{i}]"
+            for i, (start, end) in enumerate(ranges)
+            if end is None or end > start
+        )
+        labels = "".join(f"[a{i}]" for i in range(len(ranges)))
+        filters += f";{labels}concat=n={len(ranges)}:v=0:a=1[out]"
+        command += ["-filter_complex", filters, "-map", "[out]"]
+    command += [str(output)]
+    return command
 
 
 def process_media(
@@ -84,7 +105,12 @@ def process_media(
     if download.returncode != 0:
         raise MediaProcessError(failure(FailureCode.SOURCE_UNAVAILABLE, _stderr(download)))
 
-    transcode = runner(ffmpeg_command(source, output, profile))
+    try:
+        segments = fetch_segments(url)
+    except OSError, ValueError, KeyError, TypeError:
+        # SponsorBlock is an optional enhancement.
+        segments = []
+    transcode = runner(ffmpeg_command(source, output, profile, segments))
     if transcode.returncode != 0:
         raise MediaProcessError(failure(FailureCode.INVALID_INPUT, _stderr(transcode)))
     if not output.is_file() or output.stat().st_size == 0:
