@@ -40,6 +40,9 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Set up just
+        uses: extractions/setup-just@v2
+
       - name: Install dependencies
         run: just install
 
