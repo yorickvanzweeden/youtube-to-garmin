@@ -36,3 +36,13 @@ variable "worker_image" {
   type        = string
   description = "Fully qualified worker container image."
 }
+
+variable "vercel_team_slug" {
+  type        = string
+  description = "Vercel team slug used by the team OIDC issuer."
+}
+
+variable "vercel_project_name" {
+  type        = string
+  description = "Vercel project name allowed to exchange OIDC tokens."
+}

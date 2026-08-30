@@ -57,6 +57,41 @@ resource "google_service_account" "worker" {
   project      = var.project_id
 }
 
+resource "google_iam_workload_identity_pool" "vercel" {
+  project                   = var.project_id
+  workload_identity_pool_id = "vercel"
+  display_name              = "Vercel deployments"
+  description               = "Keyless identity federation for the production Vercel project."
+  disabled                  = false
+}
+
+resource "google_iam_workload_identity_pool_provider" "vercel" {
+  project                            = var.project_id
+  workload_identity_pool_id          = google_iam_workload_identity_pool.vercel.workload_identity_pool_id
+  workload_identity_pool_provider_id = "vercel"
+  display_name                       = "Vercel OIDC"
+  description                        = "Trust only production tokens from the configured Vercel project."
+
+  attribute_mapping = {
+    "google.subject"        = "assertion.sub"
+    "attribute.owner"       = "assertion.owner"
+    "attribute.project"     = "assertion.project"
+    "attribute.environment" = "assertion.environment"
+  }
+
+  attribute_condition = "assertion.owner == '${var.vercel_team_slug}' && assertion.project == '${var.vercel_project_name}' && assertion.environment == 'production'"
+
+  oidc {
+    issuer_uri = "https://oidc.vercel.com/${var.vercel_team_slug}"
+  }
+}
+
+resource "google_service_account_iam_member" "vercel_runtime" {
+  service_account_id = google_service_account.web_runtime.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.vercel.name}/attribute.project/${var.vercel_project_name}"
+}
+
 resource "google_cloud_tasks_queue" "media_launch" {
   name     = var.task_queue_name
   project  = var.project_id

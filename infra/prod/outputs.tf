@@ -22,3 +22,8 @@ output "cloud_run_job_name" {
   value       = google_cloud_run_v2_job.media_worker.name
   description = "Cloud Run media worker job name."
 }
+
+output "vercel_workload_identity_provider" {
+  value       = google_iam_workload_identity_pool_provider.vercel.name
+  description = "Workload Identity provider for Vercel OIDC token exchange."
+}
