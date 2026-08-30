@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "../../../../auth";
 import { firestore } from "../../../../lib/firestore";
+import { signedMediaUrl } from "../../../../lib/garmin-feed";
 
 const updateSchema = z
   .object({
@@ -101,4 +102,22 @@ export async function DELETE(
       .delete({ ignoreNotFound: true });
   }
   return new NextResponse(null, { status: 204 });
+}
+
+export async function GET(
+  _request: Request,
+  context: { params: Promise<{ id: string }> },
+) {
+  const session = await auth();
+  if (!session?.user?.googleSub)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { id } = await context.params;
+  const snapshot = await firestore().collection("media").doc(id).get();
+  const media = snapshot.data();
+  if (!snapshot.exists || media?.ownerGoogleSub !== session.user.googleSub)
+    return NextResponse.json({ error: "Media not found" }, { status: 404 });
+  const object = media.output?.object;
+  if (media.status !== "ready" || typeof object !== "string")
+    return NextResponse.json({ error: "Audio is not ready" }, { status: 409 });
+  return NextResponse.redirect(await signedMediaUrl(object));
 }

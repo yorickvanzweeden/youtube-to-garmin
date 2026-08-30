@@ -200,6 +200,7 @@ export default async function Home() {
                 status={capitalize(track.status ?? "queued")}
                 statusClass={statusClass(track.status)}
                 id={track.id}
+                ready={track.status === "ready"}
               />
             ))
           ) : (
@@ -270,8 +271,10 @@ function Track({
   status,
   statusClass,
   id,
+  ready,
 }: {
   id: string;
+  ready: boolean;
   title: string;
   detail: string;
   duration: string;
@@ -291,6 +294,11 @@ function Track({
         {status}
       </Badge>
       <span className="sync-mark">✓</span>
+      {ready ? (
+        <a className="secondary-button download-link" href={`/api/media/${id}`}>
+          Download
+        </a>
+      ) : null}
       <DeleteMediaButton id={id} title={title} />
     </article>
   );
