@@ -28,8 +28,6 @@ jobs:
           tar -xzf "$RUNNER_TEMP/ciq-manager.tar.gz" -C "$RUNNER_TEMP/ciq-manager"
           echo "$RUNNER_TEMP/ciq-manager" >> "$GITHUB_PATH"
 
-      - run: echo "release workflow started"
-
       - name: Validate Garmin configuration
         env:
           GARMIN_USERNAME: ${{ secrets.GARMIN_USERNAME }}
@@ -45,8 +43,21 @@ jobs:
           connect-iq-sdk-manager device download --manifest=apps/garmin/manifest.xml
 
       - name: Export signed Garmin package
+        env:
+          GARMIN_DEVELOPER_KEY_B64: ${{ secrets.GARMIN_DEVELOPER_KEY_B64 }}
+          GARMIN_TARGET_DEVICE: ${{ vars.GARMIN_TARGET_DEVICE }}
         run: |
-          echo "export step started"
+          test -n "$GARMIN_DEVELOPER_KEY_B64"
+          test -n "$GARMIN_TARGET_DEVICE"
+          export GARMIN_SDK_BIN="$(connect-iq-sdk-manager sdk current-path --bin)"
+          key_file="$RUNNER_TEMP/garmin-developer-key.der"
+          trap 'rm -f "$key_file"' EXIT
+          printf '%s' "$GARMIN_DEVELOPER_KEY_B64" | base64 --decode > "$key_file"
+          chmod 600 "$key_file"
+          export GARMIN_DEVELOPER_KEY="$key_file"
+          chmod +x scripts/garmin-release.sh
+          release_version="${{ inputs.version || github.ref_name }}"
+          scripts/garmin-release.sh "${release_version#v}"
 
       - name: Create GitHub release
         env:
