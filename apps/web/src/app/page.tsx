@@ -13,50 +13,81 @@ type DashboardMedia = {
   createdAt?: { toDate?: () => Date } | Date;
 };
 
-async function loadDashboard() {
+type Dashboard = {
+  media: DashboardMedia[];
+  device: Record<string, unknown> | null;
+  status: "operational" | "degraded" | "unauthenticated";
+};
+
+async function loadDashboard(): Promise<Dashboard> {
   try {
     const session = await auth();
-    if (!session?.user?.googleSub) return { media: [], device: null };
+    if (!session?.user?.googleSub)
+      return { media: [], device: null, status: "unauthenticated" };
     const db = firestore();
     const [mediaSnapshot, deviceSnapshot] = await Promise.all([
       db
         .collection("media")
         .where("ownerGoogleSub", "==", session.user.googleSub)
-        .orderBy("createdAt", "desc")
         .limit(100)
         .get(),
       db
         .collection("devices")
         .where("ownerGoogleSub", "==", session.user.googleSub)
-        .orderBy("createdAt", "desc")
-        .limit(1)
         .get(),
     ]);
-    return {
-      media: mediaSnapshot.docs.map((document) => ({
+    const media = mediaSnapshot.docs
+      .map((document) => ({
         id: document.id,
         ...document.data(),
-      })) as DashboardMedia[],
-      device: deviceSnapshot.empty ? null : deviceSnapshot.docs[0].data(),
+      }))
+      .sort(
+        (left, right) =>
+          timestamp((right as DashboardMedia).createdAt) -
+          timestamp((left as DashboardMedia).createdAt),
+      ) as DashboardMedia[];
+    const devices = deviceSnapshot.docs
+      .map((document) => document.data())
+      .sort(
+        (left, right) => timestamp(right.createdAt) - timestamp(left.createdAt),
+      );
+    return {
+      media,
+      device: devices[0] ?? null,
+      status: "operational",
     };
   } catch {
-    return { media: [], device: null };
+    return { media: [], device: null, status: "degraded" };
   }
+}
+
+function timestamp(value: unknown) {
+  if (value instanceof Date) return value.getTime();
+  if (value && typeof value === "object" && "toDate" in value) {
+    const date = (value as { toDate?: () => Date }).toDate?.();
+    return date?.getTime() ?? 0;
+  }
+  return 0;
 }
 
 export default async function Home() {
   const dashboard = await loadDashboard();
-  const total = dashboard.media.length || 12;
-  const synced =
-    dashboard.media.filter(
-      (item) => item.syncToGarmin && item.status === "ready",
-    ).length || 8;
-  const processing =
-    dashboard.media.filter(
-      (item) => item.status === "queued" || item.status === "processing",
-    ).length || 1;
-  const deviceName = dashboard.device?.name ?? "Forerunner 170 Music";
-  const tracks = dashboard.media.length ? dashboard.media.slice(0, 8) : null;
+  const total = dashboard.media.length;
+  const synced = dashboard.media.filter(
+    (item) => item.syncToGarmin && item.status === "ready",
+  ).length;
+  const processing = dashboard.media.filter(
+    (item) => item.status === "queued" || item.status === "processing",
+  ).length;
+  const deviceName =
+    (dashboard.device?.name as string | undefined) ?? "No device paired";
+  const tracks = dashboard.media.slice(0, 8);
+  const systemMessage =
+    dashboard.status === "operational"
+      ? "All systems operational"
+      : dashboard.status === "degraded"
+        ? "Backend unavailable"
+        : "Sign in to view your library";
   return (
     <main className="app-shell">
       <aside className="sidebar">
@@ -76,7 +107,7 @@ export default async function Home() {
           </a>
         </nav>
         <div className="sidebar-foot">
-          <span className="status-dot" /> All systems operational
+          <span className="status-dot" /> {systemMessage}
         </div>
       </aside>
 
@@ -142,7 +173,7 @@ export default async function Home() {
         </div>
 
         <div className="track-list">
-          {tracks ? (
+          {tracks.length ? (
             tracks.map((track) => (
               <Track
                 key={track.id}
@@ -154,37 +185,11 @@ export default async function Home() {
               />
             ))
           ) : (
-            <>
-              <Track
-                title="Long Run Mix"
-                detail="YouTube · Added today"
-                duration="48:32"
-                status="Ready"
-                statusClass="ready"
-              />
-              <Track
-                title="The Knowledge Project · #143"
-                detail="YouTube · Added yesterday"
-                duration="1:12:08"
-                status="Encoding"
-                statusClass="encoding"
-              />
-              <Track
-                title="Deep Work Instrumentals"
-                detail="YouTube · Added 3 days ago"
-                duration="2:04:17"
-                status="Ready"
-                statusClass="ready"
-              />
-              <Track
-                title="Thinking in Systems — lecture"
-                detail="YouTube · Added 5 days ago"
-                duration="56:19"
-                status="Failed"
-                statusClass="failed"
-                action="Retry"
-              />
-            </>
+            <p className="muted">
+              {dashboard.status === "operational"
+                ? "No audio has been added yet."
+                : systemMessage}
+            </p>
           )}
         </div>
 
@@ -195,8 +200,10 @@ export default async function Home() {
               <p className="eyebrow">CONNECTED DEVICE</p>
               <h3>{deviceName}</h3>
               <p className="muted">
-                <span className="status-dot" /> Synced 4 minutes ago · 8 tracks
-                on device
+                <span className="status-dot" />
+                {dashboard.device
+                  ? " Connected and ready to sync"
+                  : " Pair a Garmin device to sync audio"}
               </p>
             </div>
           </div>
