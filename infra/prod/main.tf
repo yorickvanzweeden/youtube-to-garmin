@@ -9,6 +9,10 @@ locals {
   ])
 }
 
+data "google_project" "current" {
+  project_id = var.project_id
+}
+
 resource "google_project_service" "required" {
   for_each           = local.required_services
   service            = each.value
@@ -100,6 +104,12 @@ resource "google_service_account_iam_member" "vercel_runtime" {
   service_account_id = google_service_account.web_runtime.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.vercel.name}/attribute.project/${var.vercel_project_name}"
+}
+
+resource "google_service_account_iam_member" "tasks_oidc_token_creator" {
+  service_account_id = google_service_account.web_runtime.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-cloudtasks.iam.gserviceaccount.com"
 }
 
 resource "google_cloud_tasks_queue" "media_launch" {
