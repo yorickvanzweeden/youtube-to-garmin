@@ -159,8 +159,18 @@ class GarminSyncDelegate extends Communications.SyncDelegate {
             :method => Communications.HTTP_REQUEST_METHOD_GET,
             :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_AUDIO,
             :mediaEncoding => Media.ENCODING_MP3,
+            :fileDownloadProgressCallback => method(:onDownloadProgress),
         };
         Communications.makeWebRequest(item["url"], null, options, method(:onAudio));
+    }
+
+    function onDownloadProgress(bytesDownloaded as Number, fileSize as Number or Null) as Void {
+        if (_pendingItems == null || _pendingItems.size() == 0 || fileSize == null || fileSize <= 0) {
+            return;
+        }
+        var completed = _nextItem * 100.0 / _pendingItems.size();
+        var current = bytesDownloaded * 100.0 / fileSize / _pendingItems.size();
+        Communications.notifySyncProgress((completed + current).toNumber());
     }
 
     function onAudio(responseCode as Number, data as Null or Dictionary or String or PersistedContent.Iterator) as Void {
