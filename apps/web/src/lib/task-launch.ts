@@ -13,7 +13,7 @@ type LaunchConfig = {
 function config(): LaunchConfig {
   const values = {
     projectId: process.env.GCP_PROJECT_ID,
-    region: process.env.GCP_REGION,
+    region: process.env.CLOUD_TASKS_REGION,
     queue: process.env.CLOUD_TASKS_QUEUE,
     jobName: process.env.CLOUD_RUN_JOB_NAME,
     serviceAccountEmail: process.env.CLOUD_RUN_SERVICE_ACCOUNT,

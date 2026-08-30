@@ -26,6 +26,12 @@ variable "task_queue_name" {
   default     = "media-launch"
 }
 
+variable "task_region" {
+  type        = string
+  description = "Cloud Tasks queue region."
+  default     = "europe-west1"
+}
+
 variable "cloud_run_job_name" {
   type        = string
   description = "Cloud Run Job name for media processing."

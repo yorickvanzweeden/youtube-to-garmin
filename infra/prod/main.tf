@@ -115,7 +115,7 @@ resource "google_service_account_iam_member" "tasks_oidc_token_creator" {
 resource "google_cloud_tasks_queue" "media_launch" {
   name     = var.task_queue_name
   project  = var.project_id
-  location = var.region
+  location = var.task_region
 
   rate_limits {
     max_concurrent_dispatches = 10

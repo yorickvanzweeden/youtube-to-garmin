@@ -1,5 +1,6 @@
 project_id        = "youtube-to-garmin"
 region            = "europe-west4"
+task_region       = "europe-west1"
 media_bucket_name = "youtube-to-garmin-media-prod"
 firestore_location = "eur3"
 worker_image       = "europe-west4-docker.pkg.dev/youtube-to-garmin/media/worker:latest"
