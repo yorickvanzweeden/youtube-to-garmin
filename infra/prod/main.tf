@@ -96,7 +96,8 @@ resource "google_iam_workload_identity_pool_provider" "vercel" {
   attribute_condition = "assertion.owner == '${var.vercel_team_slug}' && assertion.project == '${var.vercel_project_name}' && assertion.environment == 'production'"
 
   oidc {
-    issuer_uri = "https://oidc.vercel.com/${var.vercel_team_slug}"
+    issuer_uri        = "https://oidc.vercel.com/${var.vercel_team_slug}"
+    allowed_audiences = ["https://vercel.com/${var.vercel_team_slug}"]
   }
 }
 
