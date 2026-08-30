@@ -95,7 +95,7 @@ export default async function Home() {
       <aside className="sidebar">
         <div className="brand">
           <span className="brand-mark">G</span>
-          <span>Garmin Audio</span>
+          <span>YouTube MP3 Sync</span>
         </div>
         <nav aria-label="Primary navigation">
           <a className="nav-item active" href="#library">

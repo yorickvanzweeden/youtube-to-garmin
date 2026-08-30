@@ -1,4 +1,4 @@
-# Garmin Audio
+# YouTube MP3 Sync
 
 Private YouTube-to-Garmin audio sync, structured as a pnpm/uv/Terraform monorepo.
 

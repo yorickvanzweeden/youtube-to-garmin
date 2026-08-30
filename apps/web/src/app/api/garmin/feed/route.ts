@@ -36,7 +36,7 @@ export async function GET(request: Request) {
         id: document.id,
         revision,
         title: media.title ?? "Untitled audio",
-        artist: media.artist ?? "Garmin Audio",
+        artist: media.artist ?? "YouTube MP3 Sync",
         durationSeconds: media.durationSeconds ?? null,
         url: await signedMediaUrl(media.output.object),
       };

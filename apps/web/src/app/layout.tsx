@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Garmin Audio",
+  title: "YouTube MP3 Sync",
   description: "A private audio library for your Garmin watch.",
 };
 
