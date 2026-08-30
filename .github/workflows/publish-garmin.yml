@@ -47,7 +47,6 @@ jobs:
       - name: Export signed Garmin package
         env:
           GARMIN_DEVELOPER_KEY: ${{ secrets.GARMIN_DEVELOPER_KEY }}
-          GARMIN_TARGET_DEVICE: ${{ vars.GARMIN_TARGET_DEVICE }}
         run: |
           echo "export step started"
 
