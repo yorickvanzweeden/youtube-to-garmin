@@ -56,6 +56,18 @@ CLOUD_RUN_SERVICE_ACCOUNT
 `VERCEL_OIDC_TOKEN` is supplied by Vercel when OIDC federation is enabled; it
 must not be manually copied into Git or long-lived environment configuration.
 
+To preview the local allowlist without printing values, run:
+
+```sh
+./scripts/vercel-env-sync.sh
+```
+
+After reviewing the variable names and explicitly authorizing the upload, run:
+
+```sh
+./scripts/vercel-env-sync.sh --apply
+```
+
 ## Post-deploy checks
 
 1. Open the production URL and complete the authorized Google sign-in.
