@@ -49,17 +49,7 @@ jobs:
           GARMIN_DEVELOPER_KEY: ${{ secrets.GARMIN_DEVELOPER_KEY }}
           GARMIN_TARGET_DEVICE: ${{ vars.GARMIN_TARGET_DEVICE }}
         run: |
-          test -n "$GARMIN_DEVELOPER_KEY"
-          test -n "$GARMIN_TARGET_DEVICE"
-          export GARMIN_SDK_BIN="$(connect-iq-sdk-manager sdk current-path --bin)"
-          key_file="$RUNNER_TEMP/garmin-developer-key.der"
-          trap 'rm -f "$key_file"' EXIT
-          printf '%s' "$GARMIN_DEVELOPER_KEY" > "$key_file"
-          chmod 600 "$key_file"
-          export GARMIN_DEVELOPER_KEY="$key_file"
-          chmod +x scripts/garmin-release.sh
-          release_version="${{ inputs.version || github.ref_name }}"
-          scripts/garmin-release.sh "${release_version#v}"
+          echo "export step started"
 
       - name: Create GitHub release
         env:
