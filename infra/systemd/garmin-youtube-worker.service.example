@@ -1,0 +1,17 @@
+[Unit]
+Description=Garmin YouTube residential media worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Repositories/garmin-youtube/apps/worker
+EnvironmentFile=%h/.config/garmin-youtube-worker/env
+ExecStart=%h/.local/bin/uv run --frozen --no-dev python -m garmin_audio_worker.local
+Restart=always
+RestartSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

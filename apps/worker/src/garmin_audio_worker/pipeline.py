@@ -1,5 +1,7 @@
 """External media-process boundaries for the Cloud Run worker."""
 
+import os
+import shutil
 from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import StrEnum
@@ -34,10 +36,10 @@ class MediaProcessError(RuntimeError):
         self.failure = process_failure
 
 
-def ytdlp_command(url: str, output: Path) -> list[str]:
+def ytdlp_command(url: str, output: Path, cookies_file: str | None = None) -> list[str]:
     if not url.startswith(("https://", "http://")):
         raise ValueError("source URL must use HTTP(S)")
-    return [
+    command = [
         "yt-dlp",
         "--no-playlist",
         "--extract-audio",
@@ -45,10 +47,18 @@ def ytdlp_command(url: str, output: Path) -> list[str]:
         "wav",
         "--js-runtimes",
         "deno",
+        "--extractor-args",
+        "youtube:player_client=android",
+    ]
+    cookies_file = cookies_file or os.environ.get("YOUTUBE_COOKIES_FILE")
+    if cookies_file:
+        command += ["--cookies", cookies_file]
+    command += [
         "--output",
         str(output),
         url,
     ]
+    return command
 
 
 def ffmpeg_command(
@@ -103,7 +113,11 @@ def process_media(
     workdir.mkdir(parents=True, exist_ok=True)
     source = workdir / "source.wav"
     output = workdir / "output.mp3"
-    download = runner(ytdlp_command(url, source))
+    cookies_file = os.environ.get("YOUTUBE_COOKIES_FILE")
+    writable_cookies = workdir / "youtube-cookies.txt"
+    if cookies_file:
+        shutil.copyfile(cookies_file, writable_cookies)
+    download = runner(ytdlp_command(url, source, str(writable_cookies) if cookies_file else None))
     if download.returncode != 0:
         raise MediaProcessError(failure(FailureCode.SOURCE_UNAVAILABLE, _stderr(download)))
 

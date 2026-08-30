@@ -5,6 +5,7 @@ locals {
     "firestore.googleapis.com",
     "iamcredentials.googleapis.com",
     "run.googleapis.com",
+    "secretmanager.googleapis.com",
     "storage.googleapis.com",
   ])
 }
@@ -69,6 +70,24 @@ resource "google_service_account" "worker" {
   account_id   = "garmin-media-worker"
   display_name = "Garmin Audio media worker"
   project      = var.project_id
+}
+
+resource "google_secret_manager_secret" "youtube_cookies" {
+  secret_id = "youtube-cookies"
+  project   = var.project_id
+
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.required]
+}
+
+resource "google_secret_manager_secret_iam_member" "worker_youtube_cookies" {
+  project   = var.project_id
+  secret_id = google_secret_manager_secret.youtube_cookies.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.worker.email}"
 }
 
 resource "google_iam_workload_identity_pool" "vercel" {
@@ -164,6 +183,29 @@ resource "google_cloud_run_v2_job" "media_worker" {
         env {
           name  = "GCS_MEDIA_BUCKET"
           value = google_storage_bucket.media.name
+        }
+
+        env {
+          name  = "YOUTUBE_COOKIES_FILE"
+          value = "/var/secrets/youtube/cookies.txt"
+        }
+
+        volume_mounts {
+          name       = "youtube-cookies"
+          mount_path = "/var/secrets/youtube"
+        }
+      }
+
+      volumes {
+        name = "youtube-cookies"
+
+        secret {
+          secret = google_secret_manager_secret.youtube_cookies.secret_id
+
+          items {
+            version = "latest"
+            path    = "cookies.txt"
+          }
         }
       }
     }

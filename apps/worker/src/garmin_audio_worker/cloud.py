@@ -38,6 +38,15 @@ class JobStore:
             state=JobState(data.get("state", JobState.QUEUED)),
         )
 
+    def queued_job_ids(self, limit: int = 10) -> list[str]:
+        return [
+            snapshot.id
+            for snapshot in self.client.collection("jobs")
+            .where("state", "==", JobState.QUEUED.value)
+            .limit(limit)
+            .stream()
+        ]
+
     def acquire_lease(self, job_id: str, owner: str, ttl_seconds: int = 900) -> bool:
         reference = self.client.collection("jobs").document(job_id)
         transaction = self.client.transaction()
