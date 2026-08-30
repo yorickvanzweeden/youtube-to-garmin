@@ -113,6 +113,12 @@ resource "google_service_account_iam_member" "tasks_oidc_token_creator" {
   member             = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-cloudtasks.iam.gserviceaccount.com"
 }
 
+resource "google_service_account_iam_member" "tasks_oidc_act_as" {
+  service_account_id = google_service_account.web_runtime.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-cloudtasks.iam.gserviceaccount.com"
+}
+
 resource "google_cloud_tasks_queue" "media_launch" {
   name     = var.task_queue_name
   project  = var.project_id
