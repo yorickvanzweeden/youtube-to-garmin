@@ -1,6 +1,135 @@
 openapi: 3.1.0
 info:
   title: Garmin Audio API
-  version: 0.0.0
-  description: Contract placeholder; endpoints are introduced with the vertical slices.
-paths: {}
+  version: 1.0.0
+  description: Private YouTube-to-Garmin audio synchronization API.
+servers:
+  - url: https://youtube-to-garmin.vercel.app
+paths:
+  /api/media:
+    get:
+      security: [{ googleSession: [] }]
+      responses:
+        '200': { description: Media library }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      security: [{ googleSession: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MediaCreate' } } } }
+      responses:
+        '201': { description: Queued media, content: { application/json: { schema: { $ref: '#/components/schemas/QueuedMedia' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/media/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    patch:
+      security: [{ googleSession: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MediaUpdate' } } } }
+      responses:
+        '200': { description: Updated revision, content: { application/json: { schema: { $ref: '#/components/schemas/Revision' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      security: [{ googleSession: [] }]
+      responses:
+        '204': { description: Media deleted }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/jobs/{id}/retry:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      security: [{ googleSession: [] }]
+      responses:
+        '202': { description: Retry queued }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/devices:
+    get:
+      security: [{ googleSession: [] }]
+      responses: { '200': { description: Paired devices }, '401': { $ref: '#/components/responses/Unauthorized' } }
+  /api/devices/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    delete:
+      security: [{ googleSession: [] }]
+      responses:
+        '204': { description: Device revoked }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/garmin/pair/start:
+    post:
+      responses: { '201': { description: Pairing credentials, content: { application/json: { schema: { $ref: '#/components/schemas/PairingStart' } } } } }
+  /api/garmin/pair/status:
+    get:
+      parameters:
+        - { name: pairingId, in: query, required: true, schema: { type: string, format: uuid } }
+        - { name: secret, in: query, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Pairing state, content: { application/json: { schema: { $ref: '#/components/schemas/PairingStatus' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/garmin/pair/claim:
+    post:
+      security: [{ googleSession: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [code], properties: { code: { type: string, pattern: '^\\d{6}$' } } } } } }
+      responses:
+        '200': { description: Pairing approved }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/garmin/feed:
+    get:
+      security: [{ deviceToken: [] }]
+      parameters: [{ name: since, in: query, schema: { type: integer, minimum: 0, default: 0 } }]
+      responses:
+        '200': { description: Incremental feed, content: { application/json: { schema: { $ref: '#/components/schemas/Feed' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/garmin/sync-report:
+    post:
+      security: [{ deviceToken: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [revision], properties: { revision: { type: integer, minimum: 0 } } } } } }
+      responses: { '200': { description: Sync acknowledged }, '400': { $ref: '#/components/responses/BadRequest' }, '401': { $ref: '#/components/responses/Unauthorized' } }
+components:
+  parameters:
+    Id: { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+  responses:
+    BadRequest: { description: Invalid request }
+    Unauthorized: { description: Authentication required }
+    NotFound: { description: Resource not found }
+  securitySchemes:
+    googleSession: { type: apiKey, in: cookie, name: authjs.session-token }
+    deviceToken: { type: http, scheme: bearer, bearerFormat: gdev_* }
+  schemas:
+    MediaCreate:
+      type: object
+      required: [url]
+      properties:
+        url: { type: string, format: uri }
+        profile: { type: string, enum: [music-128, speech-96], default: music-128 }
+    MediaUpdate:
+      type: object
+      minProperties: 1
+      properties: { syncToGarmin: { type: boolean }, title: { type: string, minLength: 1, maxLength: 200 } }
+    QueuedMedia:
+      type: object
+      required: [id, jobId, revision, status]
+      properties: { id: { type: string }, jobId: { type: string }, revision: { type: integer }, status: { const: queued } }
+    Revision:
+      type: object
+      required: [id, revision]
+      properties: { id: { type: string }, revision: { type: integer } }
+    PairingStart:
+      type: object
+      required: [pairingId, secret, code, expiresIn]
+      properties: { pairingId: { type: string }, secret: { type: string }, code: { type: string, pattern: '^\\d{6}$' }, expiresIn: { type: integer, const: 600 } }
+    PairingStatus:
+      type: object
+      required: [status]
+      properties: { status: { type: string, enum: [pending, approved, expired] }, deviceToken: { type: string } }
+    Feed:
+      type: object
+      required: [revision, items]
+      properties:
+        revision: { type: integer, minimum: 0 }
+        items: { type: array, items: { type: object, required: [id, revision, title, artist, url], properties: { id: { type: string }, revision: { type: integer }, title: { type: string }, artist: { type: string }, durationSeconds: { type: [integer, 'null'] }, url: { type: string, format: uri } } } }
