@@ -28,20 +28,7 @@ jobs:
           tar -xzf "$RUNNER_TEMP/ciq-manager.tar.gz" -C "$RUNNER_TEMP/ciq-manager"
           echo "$RUNNER_TEMP/ciq-manager" >> "$GITHUB_PATH"
 
-      - name: Install Connect IQ SDK 9.2.0
-        env:
-          GARMIN_USERNAME: ${{ secrets.GARMIN_USERNAME }}
-          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
-          GARMIN_IQ_ACCEPTANCE_HASH: ${{ secrets.GARMIN_IQ_ACCEPTANCE_HASH }}
-        run: |
-          test -n "$GARMIN_USERNAME"
-          test -n "$GARMIN_PASSWORD"
-          test -n "$GARMIN_IQ_ACCEPTANCE_HASH"
-          connect-iq-sdk-manager agreement accept --agreement-hash="$GARMIN_IQ_ACCEPTANCE_HASH"
-          connect-iq-sdk-manager login --username="$GARMIN_USERNAME" --password="$GARMIN_PASSWORD"
-          connect-iq-sdk-manager sdk set '^9.2.0'
-
-      - name: Install Connect IQ SDK 9.2.0
+      - name: Install Connect IQ SDK 9.2.0 and target device
         env:
           GARMIN_USERNAME: ${{ secrets.GARMIN_USERNAME }}
           GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
