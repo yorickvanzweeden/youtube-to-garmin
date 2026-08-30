@@ -1,0 +1,34 @@
+pre-commit:
+  parallel: true
+  commands:
+    web-biome:
+      glob: "apps/web/**/*.{js,jsx,ts,tsx,json,jsonc,css}"
+      run: pnpm exec biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      stage_fixed: true
+    web-types:
+      glob: "apps/web/**/*.{ts,tsx}"
+      run: pnpm --dir apps/web typecheck
+    contracts:
+      glob: "packages/contracts/**/*.{json,yaml,yml,ts}"
+      run: pnpm --dir packages/contracts check
+    worker:
+      glob: "apps/worker/**/*.py"
+      run: uv run --directory apps/worker ruff check --fix . && uv run --directory apps/worker ruff format .
+      stage_fixed: true
+    terraform:
+      glob: "infra/**/*.tf"
+      run: terraform fmt {staged_files}
+      stage_fixed: true
+    terraform-check:
+      glob: "infra/**/*.{tf,hcl}"
+      run: ./scripts/terraform-check.sh
+
+pre-push:
+  parallel: true
+  commands:
+    web-test:
+      glob: "apps/web/**"
+      run: pnpm --dir apps/web test
+    worker-test:
+      glob: "apps/worker/**"
+      run: uv run --directory apps/worker pytest

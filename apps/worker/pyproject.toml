@@ -1,0 +1,21 @@
+[project]
+name = "garmin-audio-worker"
+version = "0.1.0"
+description = "Cloud Run Job worker for Garmin audio processing."
+requires-python = ">=3.14"
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.11",
+  "ty>=0.0.1",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

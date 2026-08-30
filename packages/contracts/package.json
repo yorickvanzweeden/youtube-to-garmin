@@ -1,0 +1,8 @@
+{
+  "name": "@garmin-audio/contracts",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "check": "node -e \"const fs=require('fs'); if (!fs.existsSync('openapi.yaml')) process.exit(1)\""
+  }
+}

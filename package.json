@@ -1,0 +1,15 @@
+{
+  "name": "garmin-audio",
+  "private": true,
+  "packageManager": "pnpm@10.11.0",
+  "scripts": {
+    "check": "just check",
+    "format": "pnpm exec biome format --write .",
+    "lint": "pnpm exec biome check .",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.2",
+    "lefthook": "latest"
+  }
+}

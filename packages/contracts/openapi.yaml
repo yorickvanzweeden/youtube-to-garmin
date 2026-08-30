@@ -1,0 +1,6 @@
+openapi: 3.1.0
+info:
+  title: Garmin Audio API
+  version: 0.0.0
+  description: Contract placeholder; endpoints are introduced with the vertical slices.
+paths: {}

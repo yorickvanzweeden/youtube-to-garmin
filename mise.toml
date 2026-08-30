@@ -1,0 +1,10 @@
+[tools]
+node = "24"
+python = "3.14"
+terraform = "latest"
+uv = "latest"
+lefthook = "latest"
+just = "latest"
+
+[env]
+_.file = ".env"
