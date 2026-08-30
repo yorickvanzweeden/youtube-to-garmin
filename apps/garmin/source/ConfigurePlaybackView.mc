@@ -1,7 +1,11 @@
 import Toybox.Graphics;
+import Toybox.Application;
+import Toybox.Media;
 import Toybox.WatchUi;
 
 class GarminConfigurePlaybackView extends WatchUi.View {
+
+    var _menuShown = false;
 
     function initialize() {
         View.initialize();
@@ -16,6 +20,41 @@ class GarminConfigurePlaybackView extends WatchUi.View {
     // the state of this View and prepare it to be shown. This includes
     // loading resources into memory.
     function onShow() as Void {
+        if (_menuShown) {
+            WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
+            return;
+        }
+
+        var refs = Media.getContentRefIter({
+            :contentType => Media.CONTENT_TYPE_AUDIO,
+            :shuffle => false
+        });
+        var menu = new WatchUi.CheckboxMenu({:title => "Play Downloads"});
+        var playlist = Application.Storage.getValue("playlist");
+        if (playlist == null) {
+            playlist = [];
+        }
+        var ref = refs.next();
+        while (ref != null) {
+            var content = Media.getCachedContentObj(ref);
+            if (content != null) {
+                var metadata = content.getMetadata();
+                var title = metadata.title;
+                if (title == null || title.length() == 0) {
+                    title = "Untitled audio";
+                }
+                menu.addItem(new WatchUi.CheckboxMenuItem(
+                    title,
+                    null,
+                    ref.getId(),
+                    playlist.indexOf(ref.getId()) >= 0,
+                    {}
+                ));
+            }
+            ref = refs.next();
+        }
+        WatchUi.pushView(menu, new GarminConfigurePlaybackMenuDelegate(), WatchUi.SLIDE_IMMEDIATE);
+        _menuShown = true;
     }
 
     // Update the view

@@ -1,5 +1,6 @@
 import Toybox.Lang;
 import Toybox.Media;
+import Toybox.Application;
 
 class GarminContentIterator extends Media.ContentIterator {
 
@@ -8,14 +9,21 @@ class GarminContentIterator extends Media.ContentIterator {
 
     function initialize() {
         ContentIterator.initialize();
-        var refs = Media.getContentRefIter({
-            :contentType => Media.CONTENT_TYPE_AUDIO,
-            :shuffle => false
-        });
-        var contentRef = refs.next();
-        while (contentRef != null) {
-            _contentRefs.add(contentRef);
-            contentRef = refs.next();
+        var playlist = Application.Storage.getValue("playlist");
+        if (playlist != null && playlist.size() > 0) {
+            for (var id in playlist) {
+                _contentRefs.add(new Media.ContentRef(id, Media.CONTENT_TYPE_AUDIO));
+            }
+        } else {
+            var refs = Media.getContentRefIter({
+                :contentType => Media.CONTENT_TYPE_AUDIO,
+                :shuffle => false
+            });
+            var contentRef = refs.next();
+            while (contentRef != null) {
+                _contentRefs.add(contentRef);
+                contentRef = refs.next();
+            }
         }
     }
 

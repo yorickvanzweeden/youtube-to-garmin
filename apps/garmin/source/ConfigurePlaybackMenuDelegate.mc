@@ -1,0 +1,37 @@
+import Toybox.Application;
+import Toybox.Media;
+import Toybox.WatchUi;
+
+class GarminConfigurePlaybackMenuDelegate extends WatchUi.Menu2InputDelegate {
+
+    function initialize() {
+        Menu2InputDelegate.initialize();
+    }
+
+    function onSelect(item) as Void {
+        var playlist = Application.Storage.getValue("playlist");
+        if (playlist == null) {
+            playlist = [];
+        }
+        var id = item.getId();
+        if (item.isChecked()) {
+            if (playlist.indexOf(id) < 0) {
+                playlist.add(id);
+            }
+        } else {
+            var index = playlist.indexOf(id);
+            if (index >= 0) {
+                playlist.remove(index);
+            }
+        }
+        Application.Storage.setValue("playlist", playlist);
+    }
+
+    function onDone() as Void {
+        Media.startPlayback(null);
+    }
+
+    function onBack() as Void {
+        WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
+    }
+}
