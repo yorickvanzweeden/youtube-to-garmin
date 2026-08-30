@@ -65,6 +65,10 @@ jobs:
         run: |
           release_version="${{ inputs.version || github.ref_name }}"
           tag="v${release_version#v}"
-          gh release create "$tag" output/garmin/*.iq \
-            --title "$release_version" \
-            --generate-notes
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" output/garmin/*.iq --clobber
+          else
+            gh release create "$tag" output/garmin/*.iq \
+              --title "$release_version" \
+              --generate-notes
+          fi
