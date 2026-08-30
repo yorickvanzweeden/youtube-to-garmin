@@ -80,6 +80,12 @@ class GarminSyncDelegate extends Communications.SyncDelegate {
             return;
         }
         System.println("YouTube MP3 Sync pair status " + data["status"]);
+        if (data["status"] == "expired") {
+            Application.Storage.deleteValue("pairingId");
+            Application.Storage.deleteValue("pairingSecret");
+            beginPairing();
+            return;
+        }
         if (data["status"] != "approved") {
             Communications.notifySyncComplete("Pairing status: " + data["status"] + " — approve at /pair, then select Sync now again");
             return;
