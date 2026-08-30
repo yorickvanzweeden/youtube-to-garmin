@@ -32,7 +32,10 @@ check-garmin:
     ./scripts/garmin-check.sh
 
 garmin-release version="$(cat VERSION)":
-    GARMIN_TARGET_DEVICE="${GARMIN_TARGET_DEVICE:-fr165m}" ./scripts/garmin-release.sh "{{version}}"
+    GARMIN_TARGET_DEVICE="${GARMIN_TARGET_DEVICE:-fr170m}" ./scripts/garmin-release.sh "{{version}}"
+
+garmin-sim:
+    @sdk_bin="${GARMIN_SDK_BIN:-$HOME/.Garmin/ConnectIQ/Sdks/current/bin}"; if [[ ! -x "$sdk_bin/monkeyc" ]]; then sdk_bin="$HOME/.Garmin/ConnectIQ/Sdks/connectiq-sdk-lin-9.2.0-2026-06-09-92a1605b2/bin"; fi; sim_dir="$$(mktemp -d /tmp/garmin-sim.XXXXXX)"; trap 'rm -rf "$sim_dir"' EXIT; key_file="$sim_dir/developer_key.der"; if [[ -n "${GARMIN_DEVELOPER_KEY:-}" ]]; then key_file="$GARMIN_DEVELOPER_KEY"; else openssl genrsa 4096 2>/dev/null | openssl pkcs8 -topk8 -nocrypt -outform DER -out "$key_file"; fi; "$sdk_bin/monkeyc" -d "${GARMIN_TARGET_DEVICE:-fr170m}" -f apps/garmin/monkey.jungle -o "$sim_dir/youtube-mp3-sync.prg" -y "$key_file"; "$sdk_bin/monkeydo" "$sim_dir/youtube-mp3-sync.prg" "${GARMIN_TARGET_DEVICE:-fr170m}"
 
 infra-plan:
     @test -f infra/prod/terraform.tfvars || (echo 'Create infra/prod/terraform.tfvars from the example first' >&2; exit 1)
