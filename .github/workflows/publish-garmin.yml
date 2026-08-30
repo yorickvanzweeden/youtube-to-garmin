@@ -18,4 +18,14 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Connect IQ SDK Manager
+        run: |
+          mkdir -p "$RUNNER_TEMP/ciq-manager"
+          curl --fail --location \
+            https://github.com/lindell/connect-iq-sdk-manager-cli/releases/download/v0.8.4/connect-iq-sdk-manager-cli_0.8.4_Linux_x86_64.tar.gz \
+            --output "$RUNNER_TEMP/ciq-manager.tar.gz"
+          tar -xzf "$RUNNER_TEMP/ciq-manager.tar.gz" -C "$RUNNER_TEMP/ciq-manager"
+          echo "$RUNNER_TEMP/ciq-manager" >> "$GITHUB_PATH"
+
       - run: echo "release workflow started"
