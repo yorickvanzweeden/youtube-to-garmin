@@ -9,10 +9,18 @@ export function getEnv() {
     }),
   ) as Record<(typeof required)[number], string>;
 
+  const authSecret = process.env.AUTH_SECRET;
+  if (!authSecret) throw new Error("AUTH_SECRET is required");
+  const allowedGoogleSub = process.env.ALLOWED_GOOGLE_SUB;
+  const bootstrapGoogleEmail = process.env.BOOTSTRAP_GOOGLE_EMAIL;
+  if (!allowedGoogleSub && !bootstrapGoogleEmail) {
+    throw new Error("ALLOWED_GOOGLE_SUB or BOOTSTRAP_GOOGLE_EMAIL is required");
+  }
+
   return {
     ...values,
-    authSecret: process.env.AUTH_SECRET,
-    allowedGoogleSub: process.env.ALLOWED_GOOGLE_SUB,
-    bootstrapGoogleEmail: process.env.BOOTSTRAP_GOOGLE_EMAIL,
+    authSecret,
+    allowedGoogleSub,
+    bootstrapGoogleEmail,
   };
 }
