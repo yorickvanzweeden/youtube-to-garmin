@@ -24,3 +24,6 @@ Keep credentials in the ignored root `.env` file. Run `just install` once, then
 use `just check` for the full TypeScript, web-test, worker, Terraform, and
 Garmin validation suite. The repository's Lefthook pre-commit and pre-push
 hooks run the relevant checks automatically.
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the reviewed infrastructure and Vercel
+deployment runbook.
