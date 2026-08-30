@@ -11,8 +11,9 @@ class GarminContentIterator extends Media.ContentIterator {
         ContentIterator.initialize();
         var playlist = Application.Storage.getValue("playlist");
         if (playlist != null && playlist.size() > 0) {
-            for (var playlistIndex = 0; playlistIndex < playlist.size(); ++playlistIndex) {
-                _contentRefs.add(new Media.ContentRef(playlist[playlistIndex], Media.CONTENT_TYPE_AUDIO));
+            var playlistIds = playlist.keys();
+            for (var playlistIndex = 0; playlistIndex < playlistIds.size(); ++playlistIndex) {
+                _contentRefs.add(new Media.ContentRef(playlistIds[playlistIndex], Media.CONTENT_TYPE_AUDIO));
             }
         } else {
             var refs = Media.getContentRefIter({
