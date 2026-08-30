@@ -1,4 +1,4 @@
-import { createHash, randomBytes, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomInt, randomUUID } from "node:crypto";
 
 export function digest(value: string) {
   return createHash("sha256").update(value).digest("hex");
@@ -22,5 +22,5 @@ export function createDeviceToken() {
 }
 
 function randomIntCode() {
-  return String(100000 + Math.floor(Math.random() * 900000));
+  return String(randomInt(100000, 1000000));
 }
