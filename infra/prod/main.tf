@@ -1,5 +1,6 @@
 locals {
   required_services = toset([
+    "artifactregistry.googleapis.com",
     "cloudtasks.googleapis.com",
     "firestore.googleapis.com",
     "iamcredentials.googleapis.com",
@@ -54,6 +55,60 @@ resource "google_service_account" "worker" {
   account_id   = "garmin-media-worker"
   display_name = "Garmin Audio media worker"
   project      = var.project_id
+}
+
+resource "google_cloud_tasks_queue" "media_launch" {
+  name     = var.task_queue_name
+  project  = var.project_id
+  location = var.region
+
+  rate_limits {
+    max_concurrent_dispatches = 10
+  }
+
+  retry_config {
+    max_attempts       = 5
+    max_retry_duration = "1800s"
+    min_backoff        = "5s"
+    max_backoff        = "300s"
+  }
+
+  depends_on = [google_project_service.required]
+}
+
+resource "google_cloud_run_v2_job" "media_worker" {
+  name     = var.cloud_run_job_name
+  project  = var.project_id
+  location = var.region
+
+  template {
+    task_count = 1
+
+    template {
+      service_account = google_service_account.worker.email
+      max_retries     = 2
+      timeout         = "7200s"
+
+      containers {
+        image = var.worker_image
+
+        env {
+          name  = "GCS_MEDIA_BUCKET"
+          value = google_storage_bucket.media.name
+        }
+      }
+    }
+  }
+
+  depends_on = [google_project_service.required]
+}
+
+resource "google_cloud_run_v2_job_iam_member" "task_runner" {
+  project  = var.project_id
+  location = var.region
+  name     = google_cloud_run_v2_job.media_worker.name
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${google_service_account.web_runtime.email}"
 }
 
 resource "google_project_iam_member" "web_firestore" {

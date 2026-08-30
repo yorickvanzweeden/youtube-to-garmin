@@ -19,3 +19,20 @@ variable "firestore_location" {
   description = "Firestore database location."
   default     = "eur3"
 }
+
+variable "task_queue_name" {
+  type        = string
+  description = "Cloud Tasks queue used to launch media jobs."
+  default     = "media-launch"
+}
+
+variable "cloud_run_job_name" {
+  type        = string
+  description = "Cloud Run Job name for media processing."
+  default     = "media-worker"
+}
+
+variable "worker_image" {
+  type        = string
+  description = "Fully qualified worker container image."
+}
