@@ -1,3 +1,5 @@
+import { AddAudioForm } from "./add-audio-form";
+
 export default function Home() {
   return (
     <main className="app-shell">
@@ -42,9 +44,7 @@ export default function Home() {
               Add a YouTube video and it will be prepared for your Garmin.
             </p>
           </div>
-          <button className="primary-button" type="button">
-            <span>＋</span> Add audio
-          </button>
+          <AddAudioForm />
         </div>
 
         <div className="stats-row">

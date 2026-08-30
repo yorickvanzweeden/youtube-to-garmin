@@ -175,6 +175,60 @@ nav {
   vertical-align: -1px;
   margin-right: 5px;
 }
+.add-audio-form {
+  border: 1px solid #d7e8e1;
+  background: #f2faf7;
+  border-radius: 11px;
+  padding: 12px;
+  min-width: min(100%, 620px);
+}
+.add-audio-form label {
+  display: block;
+  color: var(--green-dark);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin: 0 0 7px;
+  text-transform: uppercase;
+}
+.add-audio-fields {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.add-audio-fields input,
+.add-audio-fields select {
+  border: 1px solid #cfe2da;
+  border-radius: 7px;
+  background: white;
+  color: var(--ink);
+  padding: 10px;
+  font-size: 12px;
+  min-width: 0;
+}
+.add-audio-fields input {
+  flex: 1;
+}
+.add-audio-fields select {
+  width: 145px;
+}
+.add-audio-fields .primary-button {
+  white-space: nowrap;
+}
+.cancel-button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.form-error {
+  color: #c76055;
+  font-size: 11px;
+  margin: 8px 0 0;
+}
 .stats-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -405,6 +459,19 @@ nav {
   }
   .hero-row h2 {
     font-size: 23px;
+  }
+  .add-audio-form {
+    min-width: 0;
+    width: 100%;
+  }
+  .add-audio-fields {
+    flex-wrap: wrap;
+  }
+  .add-audio-fields input {
+    flex-basis: 100%;
+  }
+  .add-audio-fields select {
+    flex: 1;
   }
   .stats-row {
     gap: 8px;
