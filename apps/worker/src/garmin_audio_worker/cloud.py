@@ -41,25 +41,29 @@ class JobStore:
     def acquire_lease(self, job_id: str, owner: str, ttl_seconds: int = 900) -> bool:
         reference = self.client.collection("jobs").document(job_id)
         transaction = self.client.transaction()
-        snapshot = reference.get(transaction=transaction)
-        if not snapshot.exists:
-            return False
-        data = snapshot.to_dict() or {}
-        expires_at = data.get("lease", {}).get("expiresAt")
-        if expires_at and expires_at > datetime.now(UTC):
-            return False
-        transaction.update(
-            reference,
-            {
-                "lease": {
-                    "owner": owner,
-                    "expiresAt": datetime.now(UTC) + timedelta(seconds=ttl_seconds),
+
+        @firestore.transactional
+        def acquire(transaction: firestore.Transaction) -> bool:
+            snapshot = reference.get(transaction=transaction)
+            if not snapshot.exists:
+                return False
+            data = snapshot.to_dict() or {}
+            expires_at = data.get("lease", {}).get("expiresAt")
+            if expires_at and expires_at > datetime.now(UTC):
+                return False
+            transaction.update(
+                reference,
+                {
+                    "lease": {
+                        "owner": owner,
+                        "expiresAt": datetime.now(UTC) + timedelta(seconds=ttl_seconds),
+                    },
+                    "heartbeatAt": datetime.now(UTC),
                 },
-                "heartbeatAt": datetime.now(UTC),
-            },
-        )
-        transaction.commit()
-        return True
+            )
+            return True
+
+        return acquire(transaction)
 
     def mark_state(self, job_id: str, media_id: str, state: JobState) -> None:
         now = datetime.now(UTC)

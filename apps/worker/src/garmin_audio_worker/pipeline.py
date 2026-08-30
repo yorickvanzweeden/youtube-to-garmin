@@ -43,6 +43,8 @@ def ytdlp_command(url: str, output: Path) -> list[str]:
         "--extract-audio",
         "--audio-format",
         "wav",
+        "--js-runtimes",
+        "deno",
         "--output",
         str(output),
         url,
