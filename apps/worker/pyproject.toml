@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "Cloud Run Job worker for Garmin audio processing."
 requires-python = ">=3.14"
 dependencies = [
+    "google-cloud-firestore>=2.29.0",
+    "google-cloud-storage>=3.13.1",
     "yt-dlp>=2026.8.19",
 ]
 
