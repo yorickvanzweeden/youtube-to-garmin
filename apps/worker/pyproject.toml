@@ -3,7 +3,9 @@ name = "garmin-audio-worker"
 version = "0.1.0"
 description = "Cloud Run Job worker for Garmin audio processing."
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "yt-dlp>=2026.8.19",
+]
 
 [dependency-groups]
 dev = [
