@@ -21,6 +21,7 @@ export type MediaStatus =
 
 export type MediaRecord = {
   id: string;
+  title?: string;
   source: { type: "youtube"; url: string };
   profile: "music-128" | "speech-96";
   status: MediaStatus;

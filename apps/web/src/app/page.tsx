@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 type DashboardMedia = {
   id: string;
   title?: string;
+  source?: { title?: string };
   status?: string;
   syncToGarmin?: boolean;
   durationSeconds?: number;
@@ -190,7 +191,7 @@ export default async function Home() {
             tracks.map((track) => (
               <Track
                 key={track.id}
-                title={track.title ?? "Untitled audio"}
+                title={displayTitle(track)}
                 detail={`YouTube · ${track.status ?? "queued"}`}
                 duration={formatDuration(track.durationSeconds)}
                 status={capitalize(track.status ?? "queued")}
@@ -241,6 +242,11 @@ export default async function Home() {
 function formatDuration(seconds?: number) {
   if (!seconds) return "—";
   return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+}
+
+function displayTitle(track: DashboardMedia) {
+  const title = track.title?.trim() || track.source?.title?.trim();
+  return title || "Untitled audio";
 }
 
 function capitalize(value: string) {
