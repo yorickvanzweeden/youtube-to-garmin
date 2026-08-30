@@ -1,22 +1,79 @@
+# Dependencies and package-manager output
 node_modules/
+.pnp/
+.pnp.js
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output and caches
 .next/
+out/
 dist/
 build/
 coverage/
 .turbo/
 .cache/
 *.tsbuildinfo
+
+# Python
 .venv/
+venv/
+ENV/
+env/
 __pycache__/
+*.py[cod]
+*$py.class
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
+.hypothesis/
+*.egg-info/
+
+# Terraform
 .terraform/
 *.tfstate
 *.tfstate.*
 crash.log
 *.tfvars
 *.tfvars.json
-.DS_Store
+
+# Local environment and credentials
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+*.der
+*.p12
+*.jks
+credentials.json
+service-account*.json
+
+# Browser automation and local tooling
+.playwright-cli/
+.codex/
+.agents/
+.mise.local.toml
+
+# IDE, OS, and editor temporary files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.example.json
+*.swp
+*.swo
+*~
+
+# Logs and runtime files
+logs/
+*.log
+*.pid
+*.pid.lock
