@@ -11,6 +11,9 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      # Signing is intentionally performed only by the tag release workflow.
+      GARMIN_DEVELOPER_KEY: ""
     timeout-minutes: 15
     steps:
       - name: Check out repository
