@@ -7,6 +7,8 @@ import Toybox.PersistedContent;
 class GarminSyncDelegate extends Communications.SyncDelegate {
 
     const FEED_URL = "https://youtube-to-garmin.vercel.app/api/garmin/feed";
+    const PAIR_START_URL = "https://youtube-to-garmin.vercel.app/api/garmin/pair/start";
+    const PAIR_STATUS_URL = "https://youtube-to-garmin.vercel.app/api/garmin/pair/status";
     var _pendingItems = [];
     var _nextItem = 0;
     var _feedRevision = 0;
@@ -22,10 +24,72 @@ class GarminSyncDelegate extends Communications.SyncDelegate {
     function onStartSync() as Void {
         var token = Application.Storage.getValue("deviceToken");
         if (token == null) {
-            Communications.notifySyncComplete("Pair this device from the web app first");
+            var pairingId = Application.Storage.getValue("pairingId");
+            var pairingSecret = Application.Storage.getValue("pairingSecret");
+            if (pairingId != null && pairingSecret != null) {
+                pollPairing(pairingId, pairingSecret);
+            } else {
+                beginPairing();
+            }
             return;
         }
         _token = token;
+        beginFeed(token);
+    }
+
+    function beginPairing() as Void {
+        var options = {
+            :method => Communications.HTTP_REQUEST_METHOD_POST,
+            :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON,
+        };
+        Communications.makeWebRequest(PAIR_START_URL, null, options, method(:onPairStart));
+    }
+
+    function onPairStart(responseCode as Number, data as Dictionary?) as Void {
+        if (responseCode != 201 || data == null) {
+            Communications.notifySyncComplete("Unable to start device pairing");
+            return;
+        }
+        Application.Storage.setValue("pairingId", data["pairingId"]);
+        Application.Storage.setValue("pairingSecret", data["secret"]);
+        Communications.notifySyncComplete("Pairing code: " + data["code"] + " — enter it at /pair");
+    }
+
+    function pollPairing(pairingId as String, pairingSecret as String) as Void {
+        var options = {
+            :method => Communications.HTTP_REQUEST_METHOD_GET,
+            :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON,
+        };
+        Communications.makeWebRequest(
+            PAIR_STATUS_URL + "?pairingId=" + pairingId + "&secret=" + pairingSecret,
+            null,
+            options,
+            method(:onPairStatus)
+        );
+    }
+
+    function onPairStatus(responseCode as Number, data as Dictionary?) as Void {
+        if (responseCode != 200 || data == null) {
+            Communications.notifySyncComplete("Unable to check pairing status");
+            return;
+        }
+        if (data["status"] != "approved") {
+            Communications.notifySyncComplete("Pairing is waiting for approval at /pair");
+            return;
+        }
+        var token = data["deviceToken"];
+        if (token == null) {
+            Communications.notifySyncComplete("Pairing response did not include a device token");
+            return;
+        }
+        Application.Storage.setValue("deviceToken", token);
+        Application.Storage.deleteValue("pairingId");
+        Application.Storage.deleteValue("pairingSecret");
+        _token = token;
+        beginFeed(token);
+    }
+
+    function beginFeed(token as String) as Void {
         var revision = Application.Storage.getValue("revision");
         if (revision == null) {
             revision = 0;
