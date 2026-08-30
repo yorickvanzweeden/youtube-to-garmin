@@ -12,6 +12,7 @@ export async function GET() {
 
   const snapshot = await firestore()
     .collection("media")
+    .where("ownerGoogleSub", "==", session.user.googleSub)
     .orderBy("createdAt", "desc")
     .limit(100)
     .get();
@@ -58,6 +59,7 @@ export async function POST(request: Request) {
       profile: parsed.data.profile,
       status: "queued",
       syncToGarmin: true,
+      ownerGoogleSub: session.user.googleSub,
       revision: nextRevision,
       activeJobId: jobId,
       createdAt: now,

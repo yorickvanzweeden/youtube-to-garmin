@@ -29,7 +29,11 @@ export async function PATCH(
   const revision = await db.runTransaction(async (transaction) => {
     const mediaReference = db.collection("media").doc(id);
     const mediaSnapshot = await transaction.get(mediaReference);
-    if (!mediaSnapshot.exists) return null;
+    if (
+      !mediaSnapshot.exists ||
+      mediaSnapshot.data()?.ownerGoogleSub !== session.user.googleSub
+    )
+      return null;
     const libraryReference = db.collection("system").doc("library");
     const librarySnapshot = await transaction.get(libraryReference);
     const nextRevision = Number(librarySnapshot.data()?.revision ?? 0) + 1;
@@ -62,7 +66,11 @@ export async function DELETE(
   const revision = await db.runTransaction(async (transaction) => {
     const mediaReference = db.collection("media").doc(id);
     const mediaSnapshot = await transaction.get(mediaReference);
-    if (!mediaSnapshot.exists) return null;
+    if (
+      !mediaSnapshot.exists ||
+      mediaSnapshot.data()?.ownerGoogleSub !== session.user.googleSub
+    )
+      return null;
     const libraryReference = db.collection("system").doc("library");
     const librarySnapshot = await transaction.get(libraryReference);
     const nextRevision = Number(librarySnapshot.data()?.revision ?? 0) + 1;

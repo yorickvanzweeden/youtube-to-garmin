@@ -8,18 +8,24 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const snapshot = await firestore()
     .collection("devices")
-    .orderBy("createdAt", "desc")
+    .where("ownerGoogleSub", "==", session.user.googleSub)
     .get();
   return NextResponse.json({
-    data: snapshot.docs.map((document) => {
-      const device = document.data();
-      return {
-        id: document.id,
-        name: device.name,
-        createdAt: device.createdAt,
-        lastSeenAt: device.lastSeenAt,
-        lastSyncRevision: device.lastSyncRevision ?? 0,
-      };
-    }),
+    data: snapshot.docs
+      .sort((a, b) => {
+        const left = a.data().createdAt?.toMillis?.() ?? 0;
+        const right = b.data().createdAt?.toMillis?.() ?? 0;
+        return right - left;
+      })
+      .map((document) => {
+        const device = document.data();
+        return {
+          id: document.id,
+          name: device.name,
+          createdAt: device.createdAt,
+          lastSeenAt: device.lastSeenAt,
+          lastSyncRevision: device.lastSyncRevision ?? 0,
+        };
+      }),
   });
 }

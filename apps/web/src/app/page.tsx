@@ -19,8 +19,18 @@ async function loadDashboard() {
     if (!session?.user?.googleSub) return { media: [], device: null };
     const db = firestore();
     const [mediaSnapshot, deviceSnapshot] = await Promise.all([
-      db.collection("media").orderBy("createdAt", "desc").limit(100).get(),
-      db.collection("devices").orderBy("createdAt", "desc").limit(1).get(),
+      db
+        .collection("media")
+        .where("ownerGoogleSub", "==", session.user.googleSub)
+        .orderBy("createdAt", "desc")
+        .limit(100)
+        .get(),
+      db
+        .collection("devices")
+        .where("ownerGoogleSub", "==", session.user.googleSub)
+        .orderBy("createdAt", "desc")
+        .limit(1)
+        .get(),
     ]);
     return {
       media: mediaSnapshot.docs.map((document) => ({

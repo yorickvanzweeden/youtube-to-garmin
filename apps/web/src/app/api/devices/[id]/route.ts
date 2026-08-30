@@ -12,7 +12,10 @@ export async function DELETE(
   const { id } = await context.params;
   const reference = firestore().collection("devices").doc(id);
   const snapshot = await reference.get();
-  if (!snapshot.exists)
+  if (
+    !snapshot.exists ||
+    snapshot.data()?.ownerGoogleSub !== session.user.googleSub
+  )
     return NextResponse.json({ error: "Device not found" }, { status: 404 });
   await reference.delete();
   return new NextResponse(null, { status: 204 });

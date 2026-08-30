@@ -46,6 +46,7 @@ export async function POST(request: Request) {
     approvedBy: session.user.googleSub,
   });
   batch.set(db.collection("devices").doc(pairing.id), {
+    ownerGoogleSub: session.user.googleSub,
     tokenHash: device.tokenHash,
     name: "Garmin device",
     createdAt: new Date(),
