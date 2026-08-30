@@ -37,6 +37,12 @@ variable "worker_image" {
   description = "Fully qualified worker container image."
 }
 
+variable "artifact_repository_id" {
+  type        = string
+  description = "Artifact Registry repository for worker images."
+  default     = "media"
+}
+
 variable "vercel_team_slug" {
   type        = string
   description = "Vercel team slug used by the team OIDC issuer."

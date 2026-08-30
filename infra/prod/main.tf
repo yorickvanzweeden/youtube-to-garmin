@@ -45,6 +45,16 @@ resource "google_storage_bucket" "media" {
   depends_on = [google_project_service.required]
 }
 
+resource "google_artifact_registry_repository" "media" {
+  project       = var.project_id
+  location      = var.region
+  repository_id = var.artifact_repository_id
+  description   = "Container images for the Garmin media worker."
+  format        = "DOCKER"
+
+  depends_on = [google_project_service.required]
+}
+
 resource "google_service_account" "web_runtime" {
   account_id   = "garmin-web-runtime"
   display_name = "Garmin Audio web runtime"

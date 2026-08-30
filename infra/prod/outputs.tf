@@ -3,6 +3,11 @@ output "media_bucket_name" {
   description = "Private bucket used for media objects."
 }
 
+output "worker_image_repository" {
+  value       = "${google_artifact_registry_repository.media.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.media.repository_id}"
+  description = "Artifact Registry repository URL for worker images."
+}
+
 output "web_runtime_service_account" {
   value       = google_service_account.web_runtime.email
   description = "Service account for the Vercel runtime identity federation."
