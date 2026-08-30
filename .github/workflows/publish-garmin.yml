@@ -59,6 +59,13 @@ jobs:
           release_version="${{ inputs.version || github.ref_name }}"
           scripts/garmin-release.sh "${release_version#v}"
 
+      - name: Upload device sideload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: garmin-prg-${{ inputs.version || github.ref_name }}
+          path: output/garmin/*.prg
+          if-no-files-found: error
+
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}

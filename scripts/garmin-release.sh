@@ -25,5 +25,7 @@ trap 'rm -rf "$build_dir"' EXIT
 cp -R apps/garmin/. "$build_dir/garmin"
 VERSION="$version" perl -0pi -e 's/(<iq:application[^>]* version=")[^"]*(")/$1 . $ENV{VERSION} . $2/e' "$build_dir/garmin/manifest.xml"
 output="$output_dir/garmin-audio-v${version}-${GARMIN_TARGET_DEVICE}.iq"
+prg_output="$output_dir/garmin-audio-v${version}-${GARMIN_TARGET_DEVICE}.prg"
+"$monkeyc_bin" -f "$build_dir/garmin/monkey.jungle" -o "$prg_output" -y "$GARMIN_DEVELOPER_KEY"
 "$monkeyc_bin" -e -f "$build_dir/garmin/monkey.jungle" -o "$output" -y "$GARMIN_DEVELOPER_KEY"
 echo "$output"
