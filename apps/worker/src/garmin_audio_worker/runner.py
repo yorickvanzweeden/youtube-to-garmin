@@ -5,6 +5,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from .cloud import JobStore, MediaStorage
+from .jobs import JobState
 from .pipeline import AudioProfile, MediaProcessError, process_media
 
 
@@ -19,8 +20,10 @@ def run_job(job_id: str, store: JobStore, media_storage: MediaStorage) -> int:
 
     try:
         profile = AudioProfile(job.profile)
+        store.mark_state(job.id, job.media_id, JobState.DOWNLOADING)
         with TemporaryDirectory(prefix=f"garmin-{job.id}-") as directory:
             result = process_media(job.source_url, Path(directory), profile)
+            store.mark_state(job.id, job.media_id, JobState.UPLOADING)
             output = media_storage.upload(job.media_id, result.path, result.sha256)
         store.mark_ready(job.id, job.media_id, output)
         return 0

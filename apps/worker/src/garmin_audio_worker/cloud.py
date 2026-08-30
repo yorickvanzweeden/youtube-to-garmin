@@ -61,6 +61,19 @@ class JobStore:
         transaction.commit()
         return True
 
+    def mark_state(self, job_id: str, media_id: str, state: JobState) -> None:
+        now = datetime.now(UTC)
+        batch = self.client.batch()
+        batch.update(
+            self.client.collection("jobs").document(job_id),
+            {"state": state.value, "updatedAt": now},
+        )
+        batch.update(
+            self.client.collection("media").document(media_id),
+            {"status": state.value, "updatedAt": now},
+        )
+        batch.commit()
+
     def mark_ready(self, job_id: str, media_id: str, output: dict[str, object]) -> None:
         now = datetime.now(UTC)
         batch = self.client.batch()

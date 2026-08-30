@@ -11,12 +11,18 @@ from garmin_audio_worker.runner import run_job
 class FakeStore:
     job: Job
     failed: tuple[str, str, dict[str, object]] | None = None
+    states: list[JobState] | None = None
 
     def load(self, job_id: str) -> Job:
         return self.job
 
     def acquire_lease(self, job_id: str, owner: str) -> bool:
         return True
+
+    def mark_state(self, job_id: str, media_id: str, state: JobState) -> None:
+        if self.states is None:
+            self.states = []
+        self.states.append(state)
 
     def mark_failed(self, job_id: str, media_id: str, error: dict[str, object]) -> None:
         self.failed = (job_id, media_id, error)
@@ -44,3 +50,4 @@ def test_retryable_processing_failure_persists_media_identity(monkeypatch) -> No
         "media-1",
         {"code": "network", "message": "timeout", "retryable": True},
     )
+    assert store.states == [JobState.DOWNLOADING]
