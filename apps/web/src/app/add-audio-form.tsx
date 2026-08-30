@@ -2,6 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Select } from "../components/ui/select";
 
 export function AddAudioForm() {
   const router = useRouter();
@@ -15,38 +18,43 @@ export function AddAudioForm() {
     event.preventDefault();
     setSaving(true);
     setError("");
-    const response = await fetch("/api/media", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ url, profile }),
-    });
-    if (!response.ok) {
-      const result = await response.json().catch(() => null);
-      setError(result?.error ?? "Could not add this video");
+    try {
+      const response = await fetch("/api/media", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ url, profile }),
+      });
+      if (!response.ok) {
+        const result = await response.json().catch(() => null);
+        setError(result?.error ?? "Could not add this video");
+        setSaving(false);
+        return;
+      }
+      setUrl("");
+      setOpen(false);
+      router.refresh();
+    } catch {
+      setError("Network error. Check your connection and try again.");
+    } finally {
       setSaving(false);
-      return;
     }
-    setUrl("");
-    setOpen(false);
-    setSaving(false);
-    router.refresh();
   }
 
   if (!open)
     return (
-      <button
+      <Button
         className="primary-button"
         type="button"
         onClick={() => setOpen(true)}
       >
         <span>＋</span> Add audio
-      </button>
+      </Button>
     );
   return (
     <form className="add-audio-form" onSubmit={submit}>
       <label htmlFor="youtube-url">YouTube URL</label>
       <div className="add-audio-fields">
-        <input
+        <Input
           id="youtube-url"
           type="url"
           required
@@ -54,19 +62,19 @@ export function AddAudioForm() {
           value={url}
           onChange={(event) => setUrl(event.target.value)}
         />
-        <select
+        <Select
           aria-label="Audio profile"
           value={profile}
           onChange={(event) => setProfile(event.target.value)}
         >
           <option value="music-128">Music · 128 kbps</option>
           <option value="speech-96">Speech · 96 kbps</option>
-        </select>
-        <button className="primary-button" type="submit" disabled={saving}>
+        </Select>
+        <Button type="submit" disabled={saving}>
           {saving ? "Adding…" : "Add"}
-        </button>
-        <button
-          className="cancel-button"
+        </Button>
+        <Button
+          variant="ghost"
           type="button"
           onClick={() => {
             setOpen(false);
@@ -74,7 +82,7 @@ export function AddAudioForm() {
           }}
         >
           Cancel
-        </button>
+        </Button>
       </div>
       {error && (
         <p className="form-error" role="alert">

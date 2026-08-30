@@ -1,6 +1,8 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
 
 export function PairDeviceForm() {
   const [code, setCode] = useState("");
@@ -31,7 +33,7 @@ export function PairDeviceForm() {
   return (
     <form className="pair-form" onSubmit={submit}>
       <label htmlFor="pairing-code">Pairing code</label>
-      <input
+      <Input
         id="pairing-code"
         name="code"
         inputMode="numeric"
@@ -42,9 +44,9 @@ export function PairDeviceForm() {
         onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))}
         required
       />
-      <button type="submit" disabled={busy || code.length !== 6}>
+      <Button type="submit" disabled={busy || code.length !== 6}>
         {busy ? "Pairing…" : "Pair device"}
-      </button>
+      </Button>
       {message ? <output>{message}</output> : null}
     </form>
   );

@@ -1,4 +1,5 @@
 import { auth } from "../auth";
+import { Badge } from "../components/ui/badge";
 import { firestore } from "../lib/firestore";
 import { AddAudioForm } from "./add-audio-form";
 
@@ -102,9 +103,6 @@ export default async function Home() {
           <a className="nav-item" href="#devices">
             <span>⌁</span> Devices
           </a>
-          <a className="nav-item" href="#settings">
-            <span>⚙</span> Settings
-          </a>
         </nav>
         <div className="sidebar-foot">
           <span className="status-dot" /> {systemMessage}
@@ -131,7 +129,13 @@ export default async function Home() {
             <div className="account">
               <span className="avatar">Y</span>
               <span>Yorick</span>
-              <span className="chevron">⌄</span>
+              <a
+                className="chevron"
+                href="/api/auth/signout?callbackUrl=/"
+                aria-label="Sign out"
+              >
+                ↪
+              </a>
             </div>
           )}
         </header>
@@ -177,9 +181,6 @@ export default async function Home() {
               Your latest additions and their sync status.
             </p>
           </div>
-          <button className="filter-button" type="button">
-            All status <span>⌄</span>
-          </button>
         </div>
 
         <div className="track-list">
@@ -256,14 +257,12 @@ function Track({
   duration,
   status,
   statusClass,
-  action,
 }: {
   title: string;
   detail: string;
   duration: string;
   status: string;
   statusClass: string;
-  action?: string;
 }) {
   return (
     <article className="track">
@@ -273,24 +272,11 @@ function Track({
         <p className="muted">{detail}</p>
       </div>
       <span className="duration">{duration}</span>
-      <span className={`badge ${statusClass}`}>
+      <Badge className={statusClass}>
         <i />
         {status}
-      </span>
-      {action ? (
-        <button className="retry-button" type="button">
-          {action}
-        </button>
-      ) : (
-        <span className="sync-mark">✓</span>
-      )}
-      <button
-        className="more-button"
-        aria-label={`More options for ${title}`}
-        type="button"
-      >
-        •••
-      </button>
+      </Badge>
+      <span className="sync-mark">✓</span>
     </article>
   );
 }
