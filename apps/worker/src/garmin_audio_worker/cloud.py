@@ -87,16 +87,21 @@ class JobStore:
         )
         batch.commit()
 
-    def mark_ready(self, job_id: str, media_id: str, output: dict[str, object]) -> None:
+    def mark_ready(
+        self, job_id: str, media_id: str, output: dict[str, object], title: str | None = None
+    ) -> None:
         now = datetime.now(UTC)
         batch = self.client.batch()
         batch.update(
             self.client.collection("jobs").document(job_id),
             {"state": JobState.READY.value, "completedAt": now},
         )
+        media_update: dict[str, object] = {"status": "ready", "output": output, "updatedAt": now}
+        if title:
+            media_update["title"] = title
         batch.update(
             self.client.collection("media").document(media_id),
-            {"status": "ready", "output": output, "updatedAt": now},
+            media_update,
         )
         batch.commit()
 

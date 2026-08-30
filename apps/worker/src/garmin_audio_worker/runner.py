@@ -25,7 +25,7 @@ def run_job(job_id: str, store: JobStore, media_storage: MediaStorage) -> int:
             result = process_media(job.source_url, Path(directory), profile)
             store.mark_state(job.id, job.media_id, JobState.UPLOADING)
             output = media_storage.upload(job.media_id, result.path, result.sha256)
-        store.mark_ready(job.id, job.media_id, output)
+        store.mark_ready(job.id, job.media_id, output, result.title)
         return 0
     except MediaProcessError as error:
         return _fail(

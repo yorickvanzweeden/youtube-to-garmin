@@ -28,6 +28,7 @@ class ProcessedMedia:
     path: Path
     bytes: int
     sha256: str
+    title: str | None = None
 
 
 class MediaProcessError(RuntimeError):
@@ -49,6 +50,8 @@ def ytdlp_command(url: str, output: Path, cookies_file: str | None = None) -> li
         "deno",
         "--extractor-args",
         "youtube:player_client=android",
+        "--print",
+        "title",
     ]
     cookies_file = cookies_file or os.environ.get("YOUTUBE_COOKIES_FILE")
     if cookies_file:
@@ -135,7 +138,8 @@ def process_media(
         )
 
     digest = sha256_file(output)
-    return ProcessedMedia(path=output, bytes=output.stat().st_size, sha256=digest)
+    title = (download.stdout or "").strip().splitlines()[0].strip() or None
+    return ProcessedMedia(path=output, bytes=output.stat().st_size, sha256=digest, title=title)
 
 
 def sha256_file(path: Path) -> str:

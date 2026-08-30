@@ -48,11 +48,12 @@ def test_process_media_hashes_normalized_output(tmp_path: Path) -> None:
         calls.append(command)
         if command[0] == "ffmpeg":
             Path(command[-1]).write_bytes(b"normalized audio")
-        return CompletedProcess(command, 0, "", "")
+        return CompletedProcess(command, 0, "Example title\n", "")
 
     result = process_media("https://youtu.be/example", tmp_path, AudioProfile.MUSIC, runner)
     assert result.bytes == len(b"normalized audio")
     assert result.sha256 == sha256_file(result.path)
+    assert result.title == "Example title"
     assert [call[0] for call in calls] == ["yt-dlp", "ffmpeg"]
 
 
