@@ -146,7 +146,6 @@ class GarminSyncDelegate extends Communications.SyncDelegate {
         }
         var options = {
             :method => Communications.HTTP_REQUEST_METHOD_GET,
-            :headers => { "Authorization" => "Bearer " + _token },
             :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_AUDIO,
             :mediaEncoding => Media.ENCODING_MP3,
         };
