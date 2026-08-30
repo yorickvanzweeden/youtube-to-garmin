@@ -8,7 +8,10 @@ class GarminContentIterator extends Media.ContentIterator {
 
     function initialize() {
         ContentIterator.initialize();
-        var refs = Media.getContentRefIter({ :contentType => Media.CONTENT_TYPE_AUDIO });
+        var refs = Media.getContentRefIter({
+            :contentType => Media.CONTENT_TYPE_AUDIO,
+            :shuffle => false
+        });
         var contentRef = refs.next();
         while (contentRef != null) {
             _contentRefs.add(contentRef);
