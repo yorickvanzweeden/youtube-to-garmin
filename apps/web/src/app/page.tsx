@@ -116,14 +116,24 @@ export default async function Home() {
           <div>
             <p className="eyebrow">YOUR LIBRARY</p>
             <h1>
-              Good morning{dashboard.media.length ? ", Yorick" : ", Yorick"}.
+              Good morning
+              {dashboard.status === "unauthenticated" ? "" : ", Yorick"}.
             </h1>
           </div>
-          <div className="account">
-            <span className="avatar">Y</span>
-            <span>Yorick</span>
-            <span className="chevron">⌄</span>
-          </div>
+          {dashboard.status === "unauthenticated" ? (
+            <a
+              className="secondary-button"
+              href="/api/auth/signin?callbackUrl=/"
+            >
+              Sign in with Google
+            </a>
+          ) : (
+            <div className="account">
+              <span className="avatar">Y</span>
+              <span>Yorick</span>
+              <span className="chevron">⌄</span>
+            </div>
+          )}
         </header>
 
         <div className="hero-row">
@@ -207,9 +217,18 @@ export default async function Home() {
               </p>
             </div>
           </div>
-          <a className="secondary-button" href="/pair">
-            Manage device <span>→</span>
-          </a>
+          {dashboard.status === "unauthenticated" ? (
+            <a
+              className="secondary-button"
+              href="/api/auth/signin?callbackUrl=/"
+            >
+              Sign in to manage <span>→</span>
+            </a>
+          ) : (
+            <a className="secondary-button" href="/pair">
+              Manage device <span>→</span>
+            </a>
+          )}
         </section>
       </section>
     </main>
