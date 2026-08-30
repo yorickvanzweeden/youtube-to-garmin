@@ -24,6 +24,9 @@ Cloud Tasks queue, Cloud Run Job, service accounts, IAM, and Vercel OIDC
 federation. Build and push the worker image to the output repository before
 starting the Cloud Run Job.
 
+After setting `WORKER_IMAGE` in the local `.env`, use `just worker-image` to
+build and push it consistently.
+
 ## Vercel project
 
 Link the existing project and enable Secure Backend Access / OIDC federation:
