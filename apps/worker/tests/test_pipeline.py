@@ -12,6 +12,7 @@ from garmin_audio_worker.pipeline import (
     sha256_file,
     ytdlp_command,
 )
+from garmin_audio_worker.sponsorblock import Segment, video_id
 
 
 def test_commands_encode_garmin_profiles() -> None:
@@ -20,6 +21,19 @@ def test_commands_encode_garmin_profiles() -> None:
     assert "128k" in music
     assert "96k" in speech
     assert "44100" in music
+
+
+def test_video_id_supports_watch_and_short_urls() -> None:
+    assert video_id("https://www.youtube.com/watch?v=abcdefghijk") == "abcdefghijk"
+    assert video_id("https://youtu.be/abcdefghijk?t=4") == "abcdefghijk"
+
+
+def test_ffmpeg_command_removes_sponsor_intervals() -> None:
+    command = ffmpeg_command(Path("in.wav"), Path("out.mp3"), AudioProfile.MUSIC, [Segment(10, 20)])
+    rendered = " ".join(command)
+    assert "atrim=start=0.0:end=10" in rendered
+    assert "atrim=start=20,asetpts" in rendered
+    assert "concat=n=2" in rendered
 
 
 def test_ytdlp_rejects_non_http_sources() -> None:
