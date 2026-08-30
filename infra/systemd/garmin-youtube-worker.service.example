@@ -7,6 +7,8 @@ Wants=network-online.target
 Type=simple
 WorkingDirectory=%h/Repositories/garmin-youtube/apps/worker
 EnvironmentFile=%h/.config/garmin-youtube-worker/env
+Environment=GOOGLE_CLOUD_PROJECT=youtube-to-garmin
+Environment=PYTHONPATH=%h/Repositories/garmin-youtube/apps/worker/src
 ExecStart=%h/.local/bin/uv run --frozen --no-dev python -m garmin_audio_worker.local
 Restart=always
 RestartSec=10
