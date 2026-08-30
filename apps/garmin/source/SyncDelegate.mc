@@ -4,6 +4,10 @@ import Toybox.Lang;
 import Toybox.Media;
 import Toybox.PersistedContent;
 
+typedef DownloadedAudio as interface {
+    function getId() as String;
+};
+
 class GarminSyncDelegate extends Communications.SyncDelegate {
 
     const FEED_URL = "https://youtube-to-garmin.vercel.app/api/garmin/feed";
@@ -169,8 +173,8 @@ class GarminSyncDelegate extends Communications.SyncDelegate {
         if (cachedIds == null) {
             cachedIds = {} as Dictionary;
         }
-        var content = data as Media.Content;
-        cachedIds[item["id"]] = content.getContentRef().getId();
+        var downloaded = data as DownloadedAudio;
+        cachedIds[item["id"]] = downloaded.getId();
         Application.Storage.setValue("cachedIds", cachedIds);
         _nextItem += 1;
         Communications.notifySyncProgress((_nextItem * 100) / _pendingItems.size());
