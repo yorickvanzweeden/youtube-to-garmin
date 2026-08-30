@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "../../../auth";
 import { firestore } from "../../../lib/firestore";
 import { mediaCreateSchema } from "../../../lib/media";
+import { enqueueJob } from "../../../lib/task-launch";
 
 export async function GET() {
   const session = await auth();
@@ -70,6 +71,7 @@ export async function POST(request: Request) {
     });
     return nextRevision;
   });
+  await enqueueJob(jobId);
 
   return NextResponse.json(
     { id: mediaId, jobId, revision, status: "queued" },
