@@ -1,6 +1,7 @@
 import { Storage } from "@google-cloud/storage";
 import { firestore } from "./firestore";
 import { digest } from "./pairing";
+import { configureVercelGoogleAuth } from "./vercel-google-auth";
 
 export async function deviceForRequest(request: Request) {
   const authorization = request.headers.get("authorization") ?? "";
@@ -18,6 +19,7 @@ export async function deviceForRequest(request: Request) {
 }
 
 export async function signedMediaUrl(object: string) {
+  configureVercelGoogleAuth();
   const bucketName = process.env.GCS_MEDIA_BUCKET;
   if (!bucketName)
     throw new Error("GCS_MEDIA_BUCKET is required to serve media");

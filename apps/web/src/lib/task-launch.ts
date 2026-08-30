@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 import { CloudTasksClient } from "@google-cloud/tasks";
 
+import { configureVercelGoogleAuth } from "./vercel-google-auth";
+
 type LaunchConfig = {
   projectId: string;
   region: string;
@@ -26,6 +28,7 @@ function config(): LaunchConfig {
 }
 
 export async function enqueueJob(jobId: string, launchGeneration = 0) {
+  configureVercelGoogleAuth();
   const values = config();
   const client = new CloudTasksClient();
   const parent = client.queuePath(
