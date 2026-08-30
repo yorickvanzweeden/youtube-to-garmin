@@ -1,11 +1,17 @@
 import { writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { getVercelOidcTokenSync } from "@vercel/oidc";
 
 const subjectTokenPath = join(tmpdir(), "youtube-to-garmin-vercel-oidc-token");
 
 export function configureVercelGoogleAuth(): void {
-  const token = process.env.VERCEL_OIDC_TOKEN;
+  let token = process.env.VERCEL_OIDC_TOKEN;
+  try {
+    token = getVercelOidcTokenSync();
+  } catch {
+    // Local development uses ADC when no Vercel request context exists.
+  }
   const projectNumber = process.env.GCP_PROJECT_NUMBER;
   const projectId = process.env.GCP_PROJECT_ID;
   const serviceAccount = process.env.CLOUD_RUN_SERVICE_ACCOUNT;
