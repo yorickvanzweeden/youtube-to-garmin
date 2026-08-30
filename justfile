@@ -1,4 +1,4 @@
-set shell := ["bash", "-euoc"]
+set shell := ["bash", "-euo", "pipefail", "-c"]
 
 default:
     @just --list
