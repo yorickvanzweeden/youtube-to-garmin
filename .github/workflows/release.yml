@@ -1,0 +1,44 @@
+name: Release Garmin app
+
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+
+permissions:
+  contents: write
+
+jobs:
+  garmin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Connect IQ SDK
+        env:
+          GARMIN_SDK_URL: ${{ secrets.GARMIN_SDK_URL }}
+        run: |
+          test -n "$GARMIN_SDK_URL"
+          mkdir -p "$HOME/.Garmin/ConnectIQ/Sdks/current"
+          curl --fail --location "$GARMIN_SDK_URL" --output /tmp/connectiq-sdk.zip
+          unzip -q /tmp/connectiq-sdk.zip -d "$HOME/.Garmin/ConnectIQ/Sdks/current"
+
+      - name: Export signed Garmin package
+        env:
+          GARMIN_DEVELOPER_KEY: ${{ secrets.GARMIN_DEVELOPER_KEY }}
+          GARMIN_TARGET_DEVICE: ${{ vars.GARMIN_TARGET_DEVICE }}
+        run: |
+          test -n "$GARMIN_TARGET_DEVICE"
+          chmod +x scripts/garmin-release.sh
+          scripts/garmin-release.sh "${GITHUB_REF_NAME#v}"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: output/garmin/*.iq

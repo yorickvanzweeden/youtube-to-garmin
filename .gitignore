@@ -79,3 +79,4 @@ logs/
 *.pid.lock
 .vercel
 .env*
+output/

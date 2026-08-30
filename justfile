@@ -31,6 +31,9 @@ check-terraform:
 check-garmin:
     ./scripts/garmin-check.sh
 
+garmin-release version="$(cat VERSION)":
+    GARMIN_TARGET_DEVICE="${GARMIN_TARGET_DEVICE:-fr165m}" ./scripts/garmin-release.sh "{{version}}"
+
 infra-plan:
     @test -f infra/prod/terraform.tfvars || (echo 'Create infra/prod/terraform.tfvars from the example first' >&2; exit 1)
     terraform -chdir=infra/prod init
