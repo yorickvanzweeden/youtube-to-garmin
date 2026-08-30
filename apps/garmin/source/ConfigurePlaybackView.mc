@@ -48,7 +48,7 @@ class GarminConfigurePlaybackView extends WatchUi.View {
                     title,
                     null,
                     ref.getId() as Lang.String,
-                    playlist.indexOf(ref.getId() as Lang.String) >= 0,
+                    hasPlaylistId(playlist, ref.getId() as Lang.String),
                     {}
                 ));
             }
@@ -68,6 +68,15 @@ class GarminConfigurePlaybackView extends WatchUi.View {
     // state of this View here. This includes freeing resources from
     // memory.
     function onHide() as Void {
+    }
+
+    function hasPlaylistId(playlist, id) as Boolean {
+        for (var index = 0; index < playlist.size(); ++index) {
+            if (playlist[index].equals(id)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
