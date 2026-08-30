@@ -58,7 +58,7 @@ jobs:
         run: terraform -chdir=infra/prod init -backend=false
 
       - name: Run project checks
-        run: just check
+        run: just check-web check-contracts check-worker check-terraform
 
       - name: Build production artifacts
         run: just build
