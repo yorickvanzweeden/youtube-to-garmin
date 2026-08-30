@@ -72,6 +72,14 @@ class GarminSyncDelegate extends Communications.SyncDelegate {
             return;
         }
         var item = _pendingItems[_nextItem];
+        if (item["deleted"] == true) {
+            var contentRef = new Media.ContentRef(item["id"], Media.CONTENT_TYPE_AUDIO);
+            Media.deleteCachedItem(contentRef);
+            _nextItem += 1;
+            Communications.notifySyncProgress((_nextItem * 100) / _pendingItems.size());
+            downloadNext();
+            return;
+        }
         var options = {
             :method => Communications.HTTP_REQUEST_METHOD_GET,
             :headers => { "Authorization" => "Bearer " + _token },
