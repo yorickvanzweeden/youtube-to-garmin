@@ -138,9 +138,10 @@ resource "google_project_iam_member" "web_tasks_enqueuer" {
 }
 
 resource "google_cloud_run_v2_job" "media_worker" {
-  name     = var.cloud_run_job_name
-  project  = var.project_id
-  location = var.region
+  name                = var.cloud_run_job_name
+  project             = var.project_id
+  location            = var.region
+  deletion_protection = false
 
   template {
     task_count = 1
