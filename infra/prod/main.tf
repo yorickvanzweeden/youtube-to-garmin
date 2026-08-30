@@ -194,6 +194,12 @@ resource "google_project_iam_member" "web_firestore" {
   member  = "serviceAccount:${google_service_account.web_runtime.email}"
 }
 
+resource "google_project_iam_member" "worker_firestore" {
+  project = var.project_id
+  role    = "roles/datastore.user"
+  member  = "serviceAccount:${google_service_account.worker.email}"
+}
+
 resource "google_storage_bucket_iam_member" "worker_media" {
   bucket = google_storage_bucket.media.name
   role   = "roles/storage.objectAdmin"
