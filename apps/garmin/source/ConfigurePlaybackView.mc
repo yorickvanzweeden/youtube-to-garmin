@@ -31,10 +31,7 @@ class GarminConfigurePlaybackView extends WatchUi.View {
             :shuffle => false
         });
         var menu = new WatchUi.CheckboxMenu({:title => "Play Downloads"});
-        var playlist = Application.Storage.getValue("playlist");
-        if (playlist == null) {
-            playlist = {};
-        }
+        var selectedTrack = Application.Storage.getValue("selectedTrack");
         var ref = refs.next();
         while (ref != null) {
             var content = Media.getCachedContentObj(ref);
@@ -48,7 +45,7 @@ class GarminConfigurePlaybackView extends WatchUi.View {
                     title,
                     null,
                     ref.getId() as Lang.String,
-                    playlist.hasKey(ref.getId() as Lang.String),
+                    selectedTrack == (ref.getId() as Lang.String),
                     {}
                 ));
             }

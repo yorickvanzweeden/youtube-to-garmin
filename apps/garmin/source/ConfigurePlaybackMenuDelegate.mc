@@ -10,18 +10,13 @@ class GarminConfigurePlaybackMenuDelegate extends WatchUi.Menu2InputDelegate {
     }
 
     function onSelect(item) as Void {
-        var playlist = Application.Storage.getValue("playlist");
-        if (playlist == null) {
-            playlist = {};
-        }
         var checkbox = item as WatchUi.CheckboxMenuItem;
         var id = item.getId() as Lang.String;
         if (checkbox.isChecked()) {
-            playlist[id] = true;
+            Application.Storage.setValue("selectedTrack", id);
         } else {
-            playlist.remove(id);
+            Application.Storage.deleteValue("selectedTrack");
         }
-        Application.Storage.setValue("playlist", playlist);
     }
 
     function onDone() as Void {
