@@ -22,6 +22,11 @@ if [[ -z "${GARMIN_DEVELOPER_KEY:-}" ]]; then
   exit 0
 fi
 
+if [[ "${CI:-}" == "true" && "${GARMIN_ALLOW_CI_SIGNING:-}" != "1" ]]; then
+  echo 'garmin-check: CI signing is disabled for regular checks; skipping compile'
+  exit 0
+fi
+
 if [[ ! -r "$GARMIN_DEVELOPER_KEY" ]]; then
   echo "garmin-check: signing key is not readable: $GARMIN_DEVELOPER_KEY" >&2
   exit 1
