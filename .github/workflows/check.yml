@@ -56,3 +56,6 @@ jobs:
 
       - name: Run project checks
         run: just check
+
+      - name: Build production artifacts
+        run: just build

@@ -9,6 +9,10 @@ install:
 
 check: check-web check-contracts check-worker check-terraform check-garmin
 
+build:
+    pnpm --dir apps/web exec next build --webpack
+    docker build -f apps/worker/Dockerfile -t youtube-to-garmin-worker:ci apps/worker
+
 check-web:
     pnpm --dir apps/web typecheck
     pnpm exec biome check .
