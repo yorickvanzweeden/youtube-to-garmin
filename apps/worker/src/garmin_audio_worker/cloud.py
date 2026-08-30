@@ -74,6 +74,25 @@ class JobStore:
         )
         batch.commit()
 
+    def mark_failed(self, job_id: str, error: dict[str, object]) -> None:
+        self.client.collection("jobs").document(job_id).update(
+            {
+                "state": JobState.FAILED.value,
+                "error": error,
+                "completedAt": datetime.now(UTC),
+            }
+        )
+        media_id = (self.client.collection("jobs").document(job_id).get().to_dict() or {}).get(
+            "mediaId"
+        )
+        if media_id:
+            self.client.collection("media").document(media_id).update(
+                {
+                    "status": "failed",
+                    "updatedAt": datetime.now(UTC),
+                }
+            )
+
 
 class BlobLike(Protocol):
     def upload_from_filename(self, filename: str, *, content_type: str, timeout: int) -> None: ...
