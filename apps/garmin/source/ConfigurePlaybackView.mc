@@ -46,8 +46,8 @@ class GarminConfigurePlaybackView extends WatchUi.View {
                 menu.addItem(new WatchUi.CheckboxMenuItem(
                     title,
                     null,
-                    ref.getId(),
-                    playlist.indexOf(ref.getId()) >= 0,
+                    ref.getId() as String,
+                    playlist.indexOf(ref.getId() as String) >= 0,
                     {}
                 ));
             }

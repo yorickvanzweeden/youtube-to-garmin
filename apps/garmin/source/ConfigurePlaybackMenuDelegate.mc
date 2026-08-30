@@ -13,8 +13,9 @@ class GarminConfigurePlaybackMenuDelegate extends WatchUi.Menu2InputDelegate {
         if (playlist == null) {
             playlist = [];
         }
-        var id = item.getId();
-        if (item.isChecked()) {
+        var checkbox = item as WatchUi.CheckboxMenuItem;
+        var id = item.getId() as String;
+        if (checkbox.isChecked()) {
             if (playlist.indexOf(id) < 0) {
                 playlist.add(id);
             }
