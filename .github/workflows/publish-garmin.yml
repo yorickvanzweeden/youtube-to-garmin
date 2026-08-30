@@ -45,8 +45,6 @@ jobs:
           connect-iq-sdk-manager device download --manifest=apps/garmin/manifest.xml
 
       - name: Export signed Garmin package
-        env:
-          GARMIN_DEVELOPER_KEY: ${{ secrets.GARMIN_DEVELOPER_KEY }}
         run: |
           echo "export step started"
 
