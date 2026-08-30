@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
     "/*": [
       "./node_modules/@google-cloud/tasks/build/**/*.json",
       "./node_modules/google-gax/build/**/*.json",
+      "./node_modules/.pnpm/@google-cloud+tasks@*/node_modules/@google-cloud/tasks/build/**/*.json",
+      "./node_modules/.pnpm/google-gax@*/node_modules/google-gax/build/**/*.json",
     ],
   },
   reactCompiler: true,
