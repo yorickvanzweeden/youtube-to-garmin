@@ -3,6 +3,7 @@ import Toybox.Application;
 import Toybox.Lang;
 import Toybox.Media;
 import Toybox.PersistedContent;
+import Toybox.System;
 
 typedef DownloadedAudio as interface {
     function getId() as String;
@@ -73,12 +74,14 @@ class GarminSyncDelegate extends Communications.SyncDelegate {
     }
 
     function onPairStatus(responseCode as Number, data as Dictionary?) as Void {
+        System.println("YouTube MP3 Sync pair status HTTP " + responseCode);
         if (responseCode != 200 || data == null) {
             Communications.notifySyncComplete("Unable to check pairing status");
             return;
         }
+        System.println("YouTube MP3 Sync pair status " + data["status"]);
         if (data["status"] != "approved") {
-            Communications.notifySyncComplete("Pairing is waiting for approval at /pair");
+            Communications.notifySyncComplete("Pairing status: " + data["status"] + " — approve at /pair, then select Sync now again");
             return;
         }
         var token = data["deviceToken"];
