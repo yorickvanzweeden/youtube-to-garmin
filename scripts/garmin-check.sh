@@ -2,8 +2,15 @@
 set -euo pipefail
 
 monkeyc_bin="$(command -v monkeyc || true)"
-if [[ -z "$monkeyc_bin" && -x "${GARMIN_SDK_BIN:-$HOME/.Garmin/ConnectIQ/Sdks/current/bin}/monkeyc" ]]; then
-  monkeyc_bin="${GARMIN_SDK_BIN:-$HOME/.Garmin/ConnectIQ/Sdks/current/bin}/monkeyc"
+if [[ -z "$monkeyc_bin" ]]; then
+  sdk_bin="${GARMIN_SDK_BIN:-$HOME/.Garmin/ConnectIQ/Sdks/current/bin}"
+  if [[ ! -x "$sdk_bin/monkeyc" && -z "${GARMIN_SDK_BIN:-}" ]]; then
+    sdk_bin="$(find "$HOME/.Garmin/ConnectIQ/Sdks" -mindepth 2 -maxdepth 3 \
+      -type f -name monkeyc -perm -u+x -printf '%h\n' 2>/dev/null | sort -V | tail -n 1)"
+  fi
+  if [[ -x "$sdk_bin/monkeyc" ]]; then
+    monkeyc_bin="$sdk_bin/monkeyc"
+  fi
 fi
 if [[ -z "$monkeyc_bin" ]]; then
   echo 'garmin-check: Connect IQ SDK not installed; skipping Phase 0'
