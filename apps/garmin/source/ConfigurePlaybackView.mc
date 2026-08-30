@@ -35,7 +35,7 @@ class GarminConfigurePlaybackView extends WatchUi.View {
             var content = Media.getCachedContentObj(ref);
             if (content != null) {
                 var metadata = content.getMetadata();
-                var title = metadata.title;
+                var title = metadata == null ? null : metadata.title;
                 if (title == null || title.length() == 0) {
                     title = "Untitled audio";
                 }
