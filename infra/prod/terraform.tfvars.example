@@ -1,0 +1,4 @@
+project_id        = "youtube-to-garmin"
+region            = "europe-west4"
+media_bucket_name = "youtube-to-garmin-media-prod"
+firestore_location = "eur3"
