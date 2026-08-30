@@ -1,11 +1,15 @@
 # Terraform
 
-Terraform roots and modules are intentionally placeholders for Phase 1. Keep bootstrap state and production infrastructure in separate roots, and commit provider lock files once providers are initialized.
+Keep bootstrap state and production infrastructure in separate roots. The
+production root provisions the deployable Google Cloud foundation, including
+Vercel OIDC federation, and commits its provider lock file for reproducibility.
 ## Production foundation
 
 `prod/` provisions the non-secret Google Cloud foundation: required APIs, a
 private GCS media bucket, the Firestore Native database, and separate runtime
-service accounts for the web app and media worker.
+service accounts for the web app and media worker. It also provisions Artifact
+Registry, Cloud Tasks, Cloud Run Jobs, and the IAM bindings required by the
+Vercel runtime and task launcher.
 
 ```sh
 cd infra/prod
