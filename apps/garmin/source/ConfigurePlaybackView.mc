@@ -1,5 +1,6 @@
 import Toybox.Graphics;
 import Toybox.Application;
+import Toybox.Lang;
 import Toybox.Media;
 import Toybox.WatchUi;
 
@@ -46,8 +47,8 @@ class GarminConfigurePlaybackView extends WatchUi.View {
                 menu.addItem(new WatchUi.CheckboxMenuItem(
                     title,
                     null,
-                    ref.getId() as String,
-                    playlist.indexOf(ref.getId() as String) >= 0,
+                    ref.getId() as Lang.String,
+                    playlist.indexOf(ref.getId() as Lang.String) >= 0,
                     {}
                 ));
             }

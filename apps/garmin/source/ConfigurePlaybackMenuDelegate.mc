@@ -1,4 +1,5 @@
 import Toybox.Application;
+import Toybox.Lang;
 import Toybox.Media;
 import Toybox.WatchUi;
 
@@ -14,7 +15,7 @@ class GarminConfigurePlaybackMenuDelegate extends WatchUi.Menu2InputDelegate {
             playlist = [];
         }
         var checkbox = item as WatchUi.CheckboxMenuItem;
-        var id = item.getId() as String;
+        var id = item.getId() as Lang.String;
         if (checkbox.isChecked()) {
             if (playlist.indexOf(id) < 0) {
                 playlist.add(id);
