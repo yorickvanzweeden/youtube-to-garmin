@@ -26,7 +26,8 @@ class GarminConfigurePlaybackView extends WatchUi.View {
             return;
         }
 
-        var menu = new WatchUi.CheckboxMenu({:title => "Play Downloads"});
+        var menu = new WatchUi.Menu2({:title => "Play Downloads"});
+        menu.addItem(new WatchUi.MenuItem("Sync now", "Pair or download audio", :sync_now, null));
         var selectedTrack = Application.Storage.getValue("selectedTrack");
         var cachedIds = Application.Storage.getValue("cachedIds") as Dictionary;
         var keys = cachedIds == null ? [] : cachedIds.keys();

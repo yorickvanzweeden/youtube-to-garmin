@@ -1,4 +1,5 @@
 import Toybox.Application;
+import Toybox.Communications;
 import Toybox.Lang;
 import Toybox.Media;
 import Toybox.WatchUi;
@@ -10,6 +11,10 @@ class GarminConfigurePlaybackMenuDelegate extends WatchUi.Menu2InputDelegate {
     }
 
     function onSelect(item) as Void {
+        if (item.getId() == :sync_now) {
+            Communications.startSync();
+            return;
+        }
         var checkbox = item as WatchUi.CheckboxMenuItem;
         var id = item.getId() as Lang.String;
         if (checkbox.isChecked()) {
