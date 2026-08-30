@@ -190,9 +190,9 @@ export default async function Home() {
               </p>
             </div>
           </div>
-          <button className="secondary-button" type="button">
+          <a className="secondary-button" href="/pair">
             Manage device <span>→</span>
-          </button>
+          </a>
         </section>
       </section>
     </main>
